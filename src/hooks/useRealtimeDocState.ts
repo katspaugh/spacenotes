@@ -5,10 +5,18 @@ import { useRealtimeChannel, type RealtimeAction } from './useRealtimeChannel.js
 import { debounce, randomId, randomBrightColor } from '../lib/utils.js'
 import { supabase } from '../lib/supabase.js'
 import { loadDoc } from '../lib/dinky-api.js'
+import { useSession } from '@supabase/auth-helpers-react'
 
 export function useRealtimeDocState() {
   const state = useDocState()
   const { doc, setDoc } = state
+  const session = useSession()
+  const userId = session?.user?.id || ''
+  const canSendRef = useRef(true)
+
+  useEffect(() => {
+    canSendRef.current = !doc.userId || doc.userId === userId
+  }, [doc.userId, userId])
   const [cursors, setCursors] = useState<Record<string, { x: number; y: number; color: string }>>({})
   const [selections, setSelections] = useState<Record<string, string[]>>({})
   const cursorColor = useRef(randomBrightColor())
@@ -113,39 +121,48 @@ export function useRealtimeDocState() {
 
   const { send, clientId } = useRealtimeChannel(doc.id, { apply })
 
+  const sendIfAllowed = useCallback(
+    (action: RealtimeAction) => {
+      if (canSendRef.current) {
+        send(action)
+      }
+    },
+    [send],
+  )
+
   const sendUpdate = useRef(
     debounce((id: string, props: Partial<CanvasNode>) => {
-      send({ type: 'node:update', id, props })
+      sendIfAllowed({ type: 'node:update', id, props })
     }, 50),
   )
 
   const sendCursor = useRef(
     debounce((x: number, y: number) => {
-      send({ type: 'cursor:move', x, y, color: cursorColor.current })
+      sendIfAllowed({ type: 'cursor:move', x, y, color: cursorColor.current })
     }, 20),
   )
 
   const sendSelection = useRef(
     debounce((ids: string[]) => {
-      send({ type: 'node:select', ids, color: cursorColor.current })
+      sendIfAllowed({ type: 'node:select', ids, color: cursorColor.current })
     }, 20),
   )
 
   const onNodeCreate = useCallback(
     (props: Partial<CanvasNode>) => {
       const node = state.onNodeCreate(props)
-      send({ type: 'node:create', node })
+      sendIfAllowed({ type: 'node:create', node })
       return node
     },
-    [state.onNodeCreate, send],
+    [state.onNodeCreate, sendIfAllowed],
   )
 
   const onNodeDelete = useCallback(
     (id: string) => {
       state.onNodeDelete(id)
-      send({ type: 'node:delete', id })
+      sendIfAllowed({ type: 'node:delete', id })
     },
-    [state.onNodeDelete, send],
+    [state.onNodeDelete, sendIfAllowed],
   )
 
   const onNodeUpdate = useCallback(
@@ -160,33 +177,33 @@ export function useRealtimeDocState() {
     (from: string, to: string) => {
       const edge = { id: randomId(), fromNode: from, toNode: to }
       setDoc((d) => ({ ...d, edges: d.edges.concat(edge) }))
-      send({ type: 'edge:create', edge })
+      sendIfAllowed({ type: 'edge:create', edge })
     },
-    [setDoc, send],
+    [setDoc, sendIfAllowed],
   )
 
   const onDisconnect = useCallback(
     (from: string, to: string) => {
       state.onDisconnect(from, to)
-      send({ type: 'edge:delete', from, to })
+      sendIfAllowed({ type: 'edge:delete', from, to })
     },
-    [state.onDisconnect, send],
+    [state.onDisconnect, sendIfAllowed],
   )
 
   const onBackgroundColorChange = useCallback(
     (color: string) => {
       state.onBackgroundColorChange(color)
-      send({ type: 'space:background', color })
+      sendIfAllowed({ type: 'space:background', color })
     },
-    [state.onBackgroundColorChange, send],
+    [state.onBackgroundColorChange, sendIfAllowed],
   )
 
   const onTitleChange = useCallback(
     (title: string) => {
       setDoc((d) => ({ ...d, title }))
-      send({ type: 'space:title', title })
+      sendIfAllowed({ type: 'space:title', title })
     },
-    [setDoc, send],
+    [setDoc, sendIfAllowed],
   )
 
   const onCursorMove = useCallback(

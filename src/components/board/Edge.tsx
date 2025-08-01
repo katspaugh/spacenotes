@@ -51,6 +51,10 @@ export const Edge = ({ fromNode, toNode, nodes, onDisconnect, toPosition }: Edge
   const from = useMemo(() => nodes.find((node) => node.id === fromNode), [fromNode, nodes])!
   const to = useMemo(() => nodes.find((node) => node.id === toNode), [toNode, nodes])!
 
+  const onClick = useCallback(() => {
+    onDisconnect(fromNode, toNode)
+  }, [fromNode, toNode, onDisconnect])
+
   if (!from || !to) {
     console.warn(`Edge from "${fromNode}" to "${toNode}" not found in nodes`, { from, to, nodes })
     return null
@@ -75,10 +79,6 @@ export const Edge = ({ fromNode, toNode, nodes, onDisconnect, toPosition }: Edge
     y2 = path.y2
     curve = path.curve
   }
-
-  const onClick = useCallback(() => {
-    onDisconnect(fromNode, toNode)
-  }, [fromNode, toNode, onDisconnect])
 
   return (
     <g className="Edge">

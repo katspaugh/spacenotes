@@ -7,6 +7,7 @@ import { type useDocState } from './useDocState'
 import { useSession } from '@supabase/auth-helpers-react'
 
 const TITLE = 'SpaceNotes'
+const PENDING_FORK_KEY = 'spacenotes-fork'
 
 export function useInitApp(state: ReturnType<typeof useDocState>) {
   const { doc, setDoc } = state
@@ -16,6 +17,28 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
   const session = useSession()
   const userId = session?.user?.id || ''
   const isLocked = doc.userId !== userId
+
+  useEffect(() => {
+    if (userId) {
+      const stored = localStorage.getItem(PENDING_FORK_KEY)
+      if (stored) {
+        try {
+          const saved = JSON.parse(stored)
+          const newDoc = { ...saved, id: randomId(), userId }
+          saveDoc(newDoc, userId)
+            .then(() => {
+              setDoc(newDoc)
+              setUrlId(newDoc.id, newDoc.title)
+              originalDoc.current = JSON.stringify(newDoc)
+              localStorage.removeItem(PENDING_FORK_KEY)
+            })
+            .catch((err) => console.error('Error saving fork', err))
+        } catch {
+          // ignore JSON parsing errors
+        }
+      }
+    }
+  }, [userId, setDoc])
 
   // Load doc from URL
   useEffect(() => {
@@ -43,20 +66,38 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
     }
   }, [setDoc])
 
-  // Save doc on unload
-  useBeforeUnload(useCallback(() => {
-    if (!userId) return
-    setDoc((prevDoc) => {
-      if ((prevDoc.userId === userId) && prevDoc.id && prevDoc.title && JSON.stringify(prevDoc) !== originalDoc.current) {
+  // Save or offer to fork on unload
+  useBeforeUnload(useCallback((e: BeforeUnloadEvent) => {
+    if (doc.userId === userId) {
+      if (doc.id && doc.title && stringDoc !== originalDoc.current) {
         if (session?.access_token) {
-          saveDocBeacon(prevDoc, session.access_token, userId)
-        } else {
-          saveDoc(prevDoc, userId)
+          saveDocBeacon(doc, session.access_token, userId)
+        } else if (userId) {
+          saveDoc(doc, userId).catch((err) => console.error('Error saving doc', err))
         }
       }
-      return prevDoc
-    })
-  }, [setDoc, userId, session]))
+      return
+    }
+
+    if (stringDoc !== originalDoc.current) {
+      const shouldFork = window.confirm('Fork this space to your account?')
+      if (shouldFork) {
+        if (userId) {
+          const newDoc = { ...doc, id: randomId(), userId }
+          if (session?.access_token) {
+            saveDocBeacon(newDoc, session.access_token, userId)
+          } else {
+            saveDoc(newDoc, userId).catch((err) => console.error('Error saving doc', err))
+          }
+        } else {
+          localStorage.setItem(PENDING_FORK_KEY, JSON.stringify(doc))
+          window.location.href = '/'
+        }
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+  }, [doc, userId, session, stringDoc]))
 
   // Update title
   useEffect(() => {
