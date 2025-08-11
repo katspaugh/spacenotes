@@ -9,14 +9,15 @@ import { useSession } from '@supabase/auth-helpers-react'
 const TITLE = 'SpaceNotes'
 const PENDING_FORK_KEY = 'spacenotes-fork'
 
-export function useInitApp(state: ReturnType<typeof useDocState>) {
-  const { doc, setDoc } = state
+export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToken: string }) {
+  const { doc, setDoc, sessionToken } = state as ReturnType<typeof useDocState> & { sessionToken: string }
   const stringDoc = useMemo(() => JSON.stringify(doc), [doc])
   const originalDoc = useRef(stringDoc)
   // Init user session
   const session = useSession()
   const userId = session?.user?.id || ''
-  const isLocked = doc.userId !== userId
+  const isOwner = doc.userId === userId
+  const isLocked = !isOwner && !sessionToken
 
   useEffect(() => {
     if (userId) {
@@ -68,7 +69,7 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
 
   // Save or offer to fork on unload
   useBeforeUnload(useCallback((e: BeforeUnloadEvent) => {
-    if (doc.userId === userId) {
+    if (isOwner) {
       if (doc.id && doc.title && stringDoc !== originalDoc.current) {
         if (session?.access_token) {
           saveDocBeacon(doc, session.access_token, userId)
@@ -79,7 +80,7 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
       return
     }
 
-    if (stringDoc !== originalDoc.current) {
+    if (!sessionToken && stringDoc !== originalDoc.current) {
       const shouldFork = window.confirm('Fork this space to your account?')
       if (shouldFork) {
         if (userId) {
@@ -97,7 +98,7 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
         e.returnValue = ''
       }
     }
-  }, [doc, userId, session, stringDoc]))
+  }, [doc, userId, session, stringDoc, sessionToken, isOwner]))
 
   // Update title
   useEffect(() => {
@@ -133,5 +134,25 @@ export function useInitApp(state: ReturnType<typeof useDocState>) {
     setDoc((doc) => ({ ...doc, title }))
   }, [setDoc])
 
-  return { onFork, onTitleChange, isLocked }
+  const forkTimer = useRef<number | null>(null)
+  useEffect(() => {
+    if (isOwner || sessionToken) return
+    if (stringDoc === originalDoc.current) return
+    if (forkTimer.current) window.clearTimeout(forkTimer.current)
+    forkTimer.current = window.setTimeout(() => {
+      const shouldFork = window.confirm(
+        "This space was created by someone else and you can't edit it, fork it?",
+      )
+      if (shouldFork) {
+        onFork()
+      } else {
+        setDoc(JSON.parse(originalDoc.current))
+      }
+    }, 600)
+    return () => {
+      if (forkTimer.current) window.clearTimeout(forkTimer.current)
+    }
+  }, [stringDoc, isOwner, sessionToken, onFork, setDoc])
+
+  return { onFork, onTitleChange, isLocked, isOwner }
 }
