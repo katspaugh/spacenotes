@@ -13,10 +13,24 @@ export function useRealtimeDocState() {
   const session = useSession()
   const userId = session?.user?.id || ''
   const canSendRef = useRef(true)
+  const [sessionToken, setSessionToken] = useState('')
 
   useEffect(() => {
-    canSendRef.current = !doc.userId || doc.userId === userId
-  }, [doc.userId, userId])
+    if (!doc.id) return
+    const url = new URL(window.location.href)
+    const fromUrl = url.searchParams.get('session') || ''
+    const stored =
+      sessionStorage.getItem(`spacenotes-session:${doc.id}`) || ''
+    const token = fromUrl || stored
+    if (token) {
+      sessionStorage.setItem(`spacenotes-session:${doc.id}`, token)
+      setSessionToken(token)
+    }
+  }, [doc.id])
+
+  useEffect(() => {
+    canSendRef.current = !doc.userId || doc.userId === userId || !!sessionToken
+  }, [doc.userId, userId, sessionToken])
   const [cursors, setCursors] = useState<Record<string, { x: number; y: number; color: string }>>({})
   const [selections, setSelections] = useState<Record<string, string[]>>({})
   const cursorColor = useRef(randomBrightColor())
@@ -119,7 +133,8 @@ export function useRealtimeDocState() {
     [setDoc, setCursors, setSelections],
   )
 
-  const { send, clientId } = useRealtimeChannel(doc.id, { apply })
+  const roomId = sessionToken ? `${doc.id}:${sessionToken}` : ''
+  const { send, clientId } = useRealtimeChannel(roomId, { apply })
 
   const sendIfAllowed = useCallback(
     (action: RealtimeAction) => {
@@ -220,6 +235,23 @@ export function useRealtimeDocState() {
     [],
   )
 
+  const onShareSession = useCallback(() => {
+    if (!doc.id) return
+    const token = randomId()
+    sessionStorage.setItem(`spacenotes-session:${doc.id}`, token)
+    setSessionToken(token)
+    const url = new URL(window.location.href)
+    url.searchParams.set('session', token)
+    navigator.clipboard
+      .writeText(url.toString())
+      .then(() => {
+        alert(
+          'Share link is copied, please share it with your peers to collaborate on the current space.',
+        )
+      })
+      .catch((err) => console.error('Error copying session link', err))
+  }, [doc.id])
+
   return {
     ...state,
     clientId,
@@ -235,5 +267,7 @@ export function useRealtimeDocState() {
     onCursorMove,
     selections,
     onSelectNodes,
+    sessionToken,
+    onShareSession,
   }
 }

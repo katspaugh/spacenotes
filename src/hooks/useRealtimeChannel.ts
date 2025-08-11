@@ -27,15 +27,15 @@ export type RealtimeAction =
   | { type: 'node:select'; ids: string[]; color: string }
 
 export function useRealtimeChannel(
-  docId: string,
+  roomId: string,
   handlers: { apply: (action: RealtimeAction, clientId: string) => void },
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null)
   const clientId = useRef(getClientId())
 
   useEffect(() => {
-    if (!docId) return
-    const channel = supabase.channel(`space:${docId}`, {
+    if (!roomId) return
+    const channel = supabase.channel(`space:${roomId}`, {
       config: { broadcast: { self: false } },
     })
 
@@ -50,7 +50,7 @@ export function useRealtimeChannel(
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [docId, handlers])
+  }, [roomId, handlers])
 
   const send = useCallback((action: RealtimeAction) => {
     channelRef.current?.send({

@@ -11,11 +11,13 @@ type SidebarProps = {
   title?: string
   onFork: () => void
   onTitleChange: (title: string) => void
+  onShareSession: () => void
+  isOwner?: boolean
 }
 
 const ITEMS_PER_PAGE = 10
 
-export function Sidebar({ isLocked, title, onFork, onTitleChange }: SidebarProps) {
+export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession, isOwner }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [docs, setDocs] = useState([])
   const [page, setPage] = useState(1)
@@ -115,6 +117,9 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange }: SidebarProps
             <a href={makeUrl(Math.random().toString(36).slice(2))}>
               <button>＋New space</button>
             </a>
+            {isOwner && (
+              <button onClick={onShareSession}>Share session</button>
+            )}
             {isLocked && <ForkButton onFork={onFork} />}
           </div>
         )}
