@@ -16,7 +16,7 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
   // Init user session
   const session = useSession()
   const userId = session?.user?.id || ''
-  const isOwner = doc.userId === userId
+  const isOwner = !doc.userId || doc.userId === userId
   const isLocked = !isOwner && !sessionToken
 
   useEffect(() => {
