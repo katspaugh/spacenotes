@@ -81,11 +81,6 @@ export function Board(props: BoardProps) {
       y: mousePosition.y - 10,
       ...nodeProps,
     })
-    if (!node.content) {
-      setTimeout(() => {
-        document.getElementById(node.id)?.focus()
-      }, 100)
-    }
     return node
   }, [props.onNodeCreate, mousePosition.x, mousePosition.y])
 
