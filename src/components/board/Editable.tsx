@@ -30,6 +30,13 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
   const [hasMinHeight, setHasMinHeight] = useState(!content && !isManualHeight)
   const [isFocused, setIsFocused] = useState(false)
 
+  useEffect(() => {
+    if (ref.current && !content) {
+      ref.current.focus()
+      setIsFocused(true)
+    }
+  }, [content])
+
   // Update height based on content changes
   const updateHeight = useCallback(() => {
     if (!isManualHeight && ref.current) {
