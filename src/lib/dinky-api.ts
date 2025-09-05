@@ -61,7 +61,7 @@ export async function listDocsPage(userId: string, page = 1, perPage = 12): Prom
   const to = from + perPage - 1
   const { data, count, error } = await supabase
     .from('documents')
-    .select('id, data, updated_at, created_at', { count: 'exact' })
+    .select('id, data', { count: 'exact' })
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
     .order('created_at', { ascending: false })
