@@ -57,15 +57,26 @@ export function saveDocBeacon(data: DinkyDataV2, accessToken: string, userId: st
 export type SpaceMeta = { id: string; title?: string, backgroundColor?: string }
 
 export async function listDocsPage(userId: string, page = 1, perPage = 12): Promise<{ spaces: SpaceMeta[]; total: number }> {
+  if (!userId) {
+    return { spaces: [], total: 0 }
+  }
+
   const from = (page - 1) * perPage
   const to = from + perPage - 1
-  const { data, count, error } = await supabase
-    .from('documents')
-    .select('id, data', { count: 'exact' })
-    .eq('user_id', userId)
+  const makeQuery = () =>
+    supabase
+      .from('documents')
+      .select('id, data', { count: 'exact' })
+      .eq('user_id', userId)
+
+  let { data, count, error } = await makeQuery()
     .order('updated_at', { ascending: false })
     .order('created_at', { ascending: false })
     .range(from, to)
+
+  if (error?.code === '42703') {
+    ({ data, count, error } = await makeQuery().range(from, to))
+  }
 
   if (error || !data) {
     throw error || new Error('Unable to load documents')
