@@ -28,12 +28,12 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
   const ref = useRef<HTMLDivElement>(null)
   const isManualHeight = height && height === Math.round(height)
   const [hasMinHeight, setHasMinHeight] = useState(!content && !isManualHeight)
-  const [isFocused, setIsFocused] = useState(false)
+  const isFocusedRef = useRef(false)
 
   useEffect(() => {
     if (ref.current && !content) {
       ref.current.focus()
-      setIsFocused(true)
+      isFocusedRef.current = true
     }
   }, [content])
 
@@ -46,7 +46,7 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
 
   // Blur event handler to sanitize content and update height
   const onBlur = useCallback((e) => {
-    setIsFocused(false)
+    isFocusedRef.current = false
     const { innerHTML = '' } = e.target
     const newContent = sanitizeHtml(innerHTML)
     onChange(newContent)
@@ -62,10 +62,11 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     if (e.target instanceof HTMLAnchorElement) {
       e.preventDefault()
       window.open(e.target.href, '_blank')
-    } else {
-      // Set isFocused to true only on click (not on drag)
-      setIsFocused(true)
     }
+  }, [])
+
+  const onFocus = useCallback(() => {
+    isFocusedRef.current = true
   }, [])
 
   // Clear text selection
@@ -74,19 +75,25 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     selection?.removeAllRanges()
   }, [])
 
+  const isEditableFocused = useCallback(() => {
+    if (isFocusedRef.current) return true
+    if (typeof document === 'undefined') return false
+    return ref.current === document.activeElement
+  }, [])
+
   // Prevent dragging if it's focused
   const onPointerMove = useCallback((e) => {
-    if (isFocused) {
+    if (isEditableFocused()) {
       e.stopPropagation()
     } else {
       clearSelection()
       e.preventDefault()
     }
-  }, [isFocused, clearSelection])
+  }, [clearSelection, isEditableFocused])
 
   const onPointerDown = useCallback(() => {
-    if (!isFocused) clearSelection()
-  }, [isFocused, clearSelection])
+    if (!isEditableFocused()) clearSelection()
+  }, [isEditableFocused, clearSelection])
 
   // Sanitize content and prepare it for rendering
   const htmlContent = useMemo(() => ({ __html: sanitizeHtml(content) }), [content])
@@ -121,6 +128,7 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
       onPointerMove={onPointerMove}
       onPointerDown={onPointerDown}
       onBlur={onBlur}
+      onFocus={onFocus}
       onClick={onClick}
       style={style}
     />
