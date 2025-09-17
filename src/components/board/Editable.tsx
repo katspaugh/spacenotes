@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { sanitizeHtml } from '../../lib/sanitize-html.js'
 import { parseUrl } from '../../lib/utils.js'
 import { fetchPreview, type LinkPreview } from '../../lib/link-preview.js'
@@ -14,6 +15,7 @@ type EditableProps = {
 
 export const INITIAL_WIDTH = 165
 export const INITIAL_HEIGHT = 90
+const DRAG_THRESHOLD = 3
 
 const getPreviewHtml = (preview: LinkPreview) => {
   const domain = new URL(preview.url).hostname
@@ -26,16 +28,20 @@ const getPreviewHtml = (preview: LinkPreview) => {
 
 export const Editable = ({ id, content, width, height, onChange, onHeightChange }: EditableProps) => {
   const ref = useRef<HTMLDivElement>(null)
+  const pointerDownRef = useRef<{ x: number; y: number } | null>(null)
   const isManualHeight = height && height === Math.round(height)
   const [hasMinHeight, setHasMinHeight] = useState(!content && !isManualHeight)
   const [isFocused, setIsFocused] = useState(false)
 
+  const focusEditable = useCallback(() => {
+    ref.current?.focus({ preventScroll: true })
+  }, [])
+
   useEffect(() => {
-    if (ref.current && !content) {
-      ref.current.focus()
-      setIsFocused(true)
+    if (!content) {
+      focusEditable()
     }
-  }, [content])
+  }, [content, focusEditable])
 
   // Update height based on content changes
   const updateHeight = useCallback(() => {
@@ -63,9 +69,12 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
       e.preventDefault()
       window.open(e.target.href, '_blank')
     } else {
-      // Set isFocused to true only on click (not on drag)
-      setIsFocused(true)
+      focusEditable()
     }
+  }, [focusEditable])
+
+  const onFocus = useCallback(() => {
+    setIsFocused(true)
   }, [])
 
   // Clear text selection
@@ -75,7 +84,15 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
   }, [])
 
   // Prevent dragging if it's focused
-  const onPointerMove = useCallback((e) => {
+  const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (pointerDownRef.current && e.isPrimary) {
+      const dx = Math.abs(e.clientX - pointerDownRef.current.x)
+      const dy = Math.abs(e.clientY - pointerDownRef.current.y)
+      if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
+        pointerDownRef.current = null
+      }
+    }
+
     if (isFocused) {
       e.stopPropagation()
     } else {
@@ -84,9 +101,23 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     }
   }, [isFocused, clearSelection])
 
-  const onPointerDown = useCallback(() => {
+  const onPointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     if (!isFocused) clearSelection()
+    if (e.isPrimary) {
+      pointerDownRef.current = { x: e.clientX, y: e.clientY }
+    }
   }, [isFocused, clearSelection])
+
+  const onPointerUp = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (pointerDownRef.current && e.isPrimary) {
+      focusEditable()
+    }
+    pointerDownRef.current = null
+  }, [focusEditable])
+
+  const onPointerLeave = useCallback(() => {
+    pointerDownRef.current = null
+  }, [])
 
   // Sanitize content and prepare it for rendering
   const htmlContent = useMemo(() => ({ __html: sanitizeHtml(content) }), [content])
@@ -120,8 +151,12 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
       onInput={updateHeight}
       onPointerMove={onPointerMove}
       onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerLeave={onPointerLeave}
+      onPointerCancel={onPointerLeave}
       onBlur={onBlur}
       onClick={onClick}
+      onFocus={onFocus}
       style={style}
     />
   )
