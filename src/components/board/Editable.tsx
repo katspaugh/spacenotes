@@ -75,25 +75,19 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     selection?.removeAllRanges()
   }, [])
 
-  const isEditableFocused = useCallback(() => {
-    if (isFocusedRef.current) return true
-    if (typeof document === 'undefined') return false
-    return ref.current === document.activeElement
-  }, [])
-
   // Prevent dragging if it's focused
   const onPointerMove = useCallback((e) => {
-    if (isEditableFocused()) {
+    if (isFocusedRef.current) {
       e.stopPropagation()
     } else {
       clearSelection()
       e.preventDefault()
     }
-  }, [clearSelection, isEditableFocused])
+  }, [clearSelection])
 
   const onPointerDown = useCallback(() => {
-    if (!isEditableFocused()) clearSelection()
-  }, [isEditableFocused, clearSelection])
+    if (!isFocusedRef.current) clearSelection()
+  }, [clearSelection])
 
   // Sanitize content and prepare it for rendering
   const htmlContent = useMemo(() => ({ __html: sanitizeHtml(content) }), [content])
