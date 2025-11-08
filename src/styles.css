@@ -576,7 +576,8 @@ button.Sidebar_toggle:hover {
 .SelectionBox div {
   position: absolute;
   z-index: 1;
-  background-color: rgba(100, 0, 100, 0.1);
+  background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent-color) 50%, transparent);
   user-select: none;
   border-radius: 4px;
 }

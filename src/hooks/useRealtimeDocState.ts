@@ -64,14 +64,12 @@ export function useRealtimeDocState() {
       switch (action.type) {
         case 'node:create':
           setDoc((d) => {
-            const newDoc = { ...d, nodes: d.nodes.concat(action.node) }
             const pending = pendingUpdates.current[action.node.id]
+            const node = pending ? { ...action.node, ...pending } : action.node
             if (pending) {
-              const node = newDoc.nodes.find((n) => n.id === action.node.id)
-              if (node) Object.assign(node, pending)
               delete pendingUpdates.current[action.node.id]
             }
-            return newDoc
+            return { ...d, nodes: d.nodes.concat(node) }
           })
           break
         case 'node:update':
