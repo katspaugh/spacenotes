@@ -112,6 +112,7 @@ button {
   padding: var(--space-s) var(--space-m);
   cursor: pointer;
   transition: background-color 0.2s;
+  color: var(--color-text);
 }
 
 button:hover:not([disabled]) {

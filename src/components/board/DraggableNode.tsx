@@ -24,6 +24,34 @@ export function DraggableNode(props: DraggableNodeProps) {
   const position = useRef({ x: props.x, y: props.y })
   const size = useRef({ width: props.width ?? 0, height: props.height ?? 0 })
   const isBackgroundCard = props.color && props.width * props.height > BG_THRESHOLD
+  const isDraggingRef = useRef(false)
+
+  const onDragStart = useCallback(() => {
+    isDraggingRef.current = true
+    // Disable contentEditable to prevent text selection during drag
+    // This only applies when not in edit mode (handled by onPointerMove in Editable)
+    if (ref.current) {
+      const editables = ref.current.querySelectorAll('[contenteditable="true"]')
+      editables.forEach((el) => {
+        el.setAttribute('contenteditable', 'false')
+        el.classList.add('dragging')
+      })
+    }
+  }, [])
+
+  const onDragEnd = useCallback(() => {
+    isDraggingRef.current = false
+    // Re-enable contentEditable after a short delay
+    setTimeout(() => {
+      if (ref.current) {
+        const editables = ref.current.querySelectorAll('.dragging')
+        editables.forEach((el) => {
+          el.setAttribute('contenteditable', 'true')
+          el.classList.remove('dragging')
+        })
+      }
+    }, 100)
+  }, [])
 
   const onDrag = useCallback(
     (dx: number, dy: number) => {
@@ -93,8 +121,8 @@ export function DraggableNode(props: DraggableNodeProps) {
 
   useEffect(() => {
     if (!ref.current) return
-    return draggable(ref.current, onDrag)
-  }, [onDrag])
+    return draggable(ref.current, onDrag, onDragStart, onDragEnd)
+  }, [onDrag, onDragStart, onDragEnd])
 
   const sx = useMemo(() => ({
     transform: `translate(${props.x}px, ${props.y}px)`,
