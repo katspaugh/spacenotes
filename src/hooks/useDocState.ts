@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { DinkyDataV2 } from '../lib/dinky-api'
 import type { CanvasNode } from '../types/canvas'
-import { randomId } from '../lib/utils.js'
+import { randomId, randomPastelColor } from '../lib/utils.js'
 
 export function useDocState() {
   const [_doc, setDoc] = useState<DinkyDataV2>({ nodes: [], edges: [], id: '', lastSequence: 0, version: 2 })
@@ -49,9 +49,9 @@ export function useDocState() {
     }
   }, [])
 
-  const onConnect = useCallback((from: string, to: string) => {
+  const onConnect = useCallback((from: string, to: string, color?: string) => {
     setDoc((doc) => {
-      return { ...doc, edges: doc.edges.concat({ id: randomId(), fromNode: from, toNode: to }) }
+      return { ...doc, edges: doc.edges.concat({ id: randomId(), fromNode: from, toNode: to, color: color || randomPastelColor() }) }
     })
   }, [])
 

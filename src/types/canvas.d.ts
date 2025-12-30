@@ -15,6 +15,7 @@ export type CanvasEdge = {
   id: string
   fromNode: string
   toNode: string
+  color?: string
 }
 
 export type CanvasProps = {

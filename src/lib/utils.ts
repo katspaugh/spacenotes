@@ -49,6 +49,22 @@ export function randomBrightColor() {
   return `hsl(${h} ${s}% ${l}%)`
 }
 
+export function randomPastelColor() {
+  // Same pastel colors as ColorPicker, excluding the first off-white color
+  const PASTEL_COLORS = [
+    '#ffe8ed',
+    '#d6e2e7',
+    '#bbeebb',
+    '#fefeca',
+    '#e1d8f0',
+    '#ffd9a3',
+    '#d9f3e6',
+    '#BFE8FE',
+    '#fff2d9',
+  ]
+  return PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)]
+}
+
 
 export function parseUrl(text = '') {
   const match = text.match(/^((data:|https?:)\/\/\S+)(\s+|<br\s*\/?>)??$/) // match URL followed by space or <br>

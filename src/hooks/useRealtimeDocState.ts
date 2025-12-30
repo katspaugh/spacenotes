@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, useEffect } from 'react'
 import type { CanvasNode } from '../types/canvas.js'
 import { useDocState } from './useDocState.js'
 import { useRealtimeChannel, type RealtimeAction } from './useRealtimeChannel.js'
-import { debounce, randomId, randomBrightColor } from '../lib/utils.js'
+import { debounce, randomId, randomBrightColor, randomPastelColor } from '../lib/utils.js'
 import { supabase } from '../lib/supabase.js'
 import { loadDoc } from '../lib/dinky-api.js'
 import { useSession } from '@supabase/auth-helpers-react'
@@ -187,8 +187,8 @@ export function useRealtimeDocState() {
   )
 
   const onConnect = useCallback(
-    (from: string, to: string) => {
-      const edge = { id: randomId(), fromNode: from, toNode: to }
+    (from: string, to: string, color?: string) => {
+      const edge = { id: randomId(), fromNode: from, toNode: to, color: color || randomPastelColor() }
       setDoc((d) => ({ ...d, edges: d.edges.concat(edge) }))
       sendIfAllowed({ type: 'edge:create', edge })
     },

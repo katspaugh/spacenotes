@@ -7,6 +7,7 @@ import { useOnKey } from '../../hooks/useOnKey.js'
 import { SelectionBox } from './SelectionBox.js'
 import { INITIAL_HEIGHT, INITIAL_WIDTH } from './Editable.js'
 import { ColorPicker } from '../ColorPicker.js'
+import { randomPastelColor } from '../../lib/utils.js'
 
 type BoardProps = {
   nodes: CanvasNode[]
@@ -16,7 +17,7 @@ type BoardProps = {
   onNodeCreate: (node: Partial<CanvasNode>) => CanvasNode
   onNodeDelete: (id: string) => void
   onNodeUpdate: (id: string, props: Partial<CanvasNode>) => void
-  onConnect: (from: string, to: string) => void
+  onConnect: (from: string, to: string, color?: string) => void
   onDisconnect: (from: string, to: string) => void
   onBackgroundColorChange: (color: string) => void
   cursors: Record<string, { x: number; y: number; color: string }>
@@ -31,6 +32,7 @@ const HEIGHT = 5000
 
 export function Board(props: BoardProps) {
   const tempFrom = useRef<string | null>(null)
+  const [tempEdge, setTempEdge] = useState<CanvasEdge | null>(null)
   const [selectedNodes, setSelectedNodes] = useState<string[]>([])
   const mousePosition = useMousePosition()
 
@@ -63,16 +65,17 @@ export function Board(props: BoardProps) {
 
   const onNodeClick = useCallback(
     (id: string) => {
-      if (tempFrom.current) {
+      if (tempFrom.current && tempEdge) {
         if (tempFrom.current !== id) {
-          props.onConnect(tempFrom.current, id)
+          props.onConnect(tempFrom.current, id, tempEdge.color)
         }
         tempFrom.current = null
+        setTempEdge(null)
       } else {
         updateSelection([id])
       }
     },
-    [props.onConnect, updateSelection],
+    [props.onConnect, updateSelection, tempEdge],
   )
 
   const onNodeCreate = useCallback((nodeProps?: Partial<CanvasNode>) => {
@@ -87,12 +90,13 @@ export function Board(props: BoardProps) {
   const onBoardClick = useCallback(() => {
     updateSelection([])
 
-    if (tempFrom.current) {
+    if (tempFrom.current && tempEdge) {
       const node = onNodeCreate()
-      props.onConnect(tempFrom.current, node.id)
+      props.onConnect(tempFrom.current, node.id, tempEdge.color)
       tempFrom.current = null
+      setTempEdge(null)
     }
-  }, [onNodeCreate, props.onConnect])
+  }, [onNodeCreate, props.onConnect, updateSelection, tempEdge])
 
   const onBoardDblClick = useCallback(() => {
     const node = onNodeCreate()
@@ -115,7 +119,9 @@ export function Board(props: BoardProps) {
   }, [props.nodes, props.onNodeUpdate, selectedNodes])
 
   const onConnectStart = useCallback((id: string) => {
+    const color = randomPastelColor()
     tempFrom.current = id
+    setTempEdge({ id: 'temp', fromNode: id, toNode: id, color })
   }, [])
 
   const renderNode = useCallback(
@@ -144,6 +150,7 @@ export function Board(props: BoardProps) {
           nodes={props.nodes}
           onDisconnect={props.onDisconnect}
           toPosition={toPosition}
+          color={edge.color}
         />
       )
     },
@@ -176,6 +183,7 @@ export function Board(props: BoardProps) {
     () => {
       if (tempFrom.current) {
         tempFrom.current = null
+        setTempEdge(null)
         return
       }
 
@@ -206,7 +214,7 @@ export function Board(props: BoardProps) {
 
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
         {props.edges?.map(renderEdge)}
-        {tempFrom.current && renderEdge({ id: 'temp', fromNode: tempFrom.current, toNode: tempFrom.current }, undefined, undefined, mousePosition)}
+        {tempEdge && renderEdge(tempEdge, undefined, undefined, mousePosition)}
       </svg>
 
       {Object.entries(props.cursors).map(([id, c]) => (

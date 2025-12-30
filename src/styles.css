@@ -297,6 +297,7 @@ textarea {
   fill: none;
   pointer-events: all;
   cursor: pointer;
+  transition: stroke 0.15s ease-out, stroke-width 0.15s ease-out;
 }
 
 .Edge path:hover {
@@ -306,6 +307,7 @@ textarea {
 
 .Edge circle {
   fill: var(--connector-color);
+  transition: fill 0.15s ease-out;
 }
 
 .Connector {
