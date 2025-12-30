@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { signIn, signUp } from '../services/supabaseService.js'
 
-export function Auth() {
+type AuthProps = {
+  onSuccess?: () => void
+}
+
+export function Auth({ onSuccess }: AuthProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -20,8 +24,12 @@ export function Auth() {
       else setMessage('Check your email to confirm sign up')
     } else {
       const { error } = await signIn(email, password)
-      if (error) setError(error.message)
-      else setMessage('Signed in!')
+      if (error) {
+        setError(error.message)
+      } else {
+        setMessage('Signed in!')
+        onSuccess?.()
+      }
     }
     setLoading(false)
   }

@@ -1,20 +1,20 @@
-import { useSession } from '@supabase/auth-helpers-react'
-import { AuthPage } from '../pages/AuthPage.js'
-import { SpacesPage } from '../pages/SpacesPage.js'
+import { useEffect, useState } from 'react'
 import { EditorPage } from '../pages/EditorPage.js'
-import { getUrlId } from '../lib/url.js'
+import { getUrlId, setUrlId } from '../lib/url.js'
+import { randomId } from '../lib/utils.js'
 
 export function App() {
-  const session = useSession()
-  const id = getUrlId()
+  const [id, setId] = useState(() => getUrlId())
 
-  if (id) {
-    return <EditorPage />
-  }
+  // Auto-create new space when landing without doc ID
+  useEffect(() => {
+    if (!id) {
+      const newId = randomId()
+      setUrlId(newId)
+      setId(newId)
+    }
+  }, [id])
 
-  if (session && !id) {
-    return <SpacesPage />
-  }
-
-  return <AuthPage />
+  // Always show EditorPage - it handles everything now
+  return <EditorPage />
 }

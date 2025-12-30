@@ -1,6 +1,7 @@
 :root {
   /* Typography */
-  --font-family: 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --font-family: 'Mulish', Avenir, Helvetica, Arial, sans-serif;
+  --font-family-cards: 'Nunito Sans', Avenir, Helvetica, Arial, sans-serif;
   --font-size: 16px;
 
   /* Spacing */
@@ -242,6 +243,7 @@ textarea {
   overflow: auto;
   outline: none;
   color: var(--card-text-color);
+  font-family: var(--font-family-cards);
 }
 
 .Editable:focus {
@@ -426,14 +428,6 @@ button.Sidebar_toggle:hover {
   filter: brightness(1.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  button.Sidebar_toggle:hover,
-  button.Sidebar_toggle {
-    background-color: #fff !important;
-    background-size: 107% !important;
-  }
-}
-
 .Sidebar_drawer .Sidebar_toggle {
   position: absolute;
   z-index: 1;
@@ -445,7 +439,7 @@ button.Sidebar_toggle:hover {
   display: flex;
   flex-direction: row;
   gap: var(--space-s);
-  padding: var(--space-s) var(--space-m);
+  padding: 0 var(--space-m);
 }
 
 .ForkButton {
@@ -476,7 +470,7 @@ button.Sidebar_toggle:hover {
 }
 
 .Sidebar h1 {
-  margin: var(--space-m) var(--space-m) var(--space-s);
+  margin: var(--space-s) var(--space-m) var(--space-s);
 }
 
 .Sidebar h1 a {
@@ -490,19 +484,21 @@ button.Sidebar_toggle:hover {
   border-top: 1px solid var(--color-border);
 }
 
-.Sidebar ul {
-  padding: 0 var(--space-m);
-  margin: 0;
+.Sidebar_links {
+  flex: 1;
+  padding: 0;
+  margin: var(--space-m);
   list-style: none;
 }
 
-.Sidebar li {
+.Sidebar_links li {
   margin: 0;
   padding: 0;
 }
 
-.Sidebar li a {
+.Sidebar_links li * {
   display: block;
+  font-size: 0.9em;
   padding: var(--space-s) var(--space-s);
   color: var(--menu-text-color);
   text-decoration: none;
@@ -512,18 +508,11 @@ button.Sidebar_toggle:hover {
   text-overflow: ellipsis;
 }
 
-.Sidebar_current {
-  display: block;
-  padding: var(--space-s) var(--space-s);
+.Sidebar_links li .Sidebar_current {
   font-weight: bold;
-  color: var(--menu-text-color);
-  border-radius: var(--radius);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.Sidebar li a:hover {
+.Sidebar_links li a:hover {
   background: var(--menu-hover-color);
   color: var(--menu-hover-text-color);
 }
@@ -539,9 +528,19 @@ button.Sidebar_toggle:hover {
   flex: 1;
 }
 
-.Sidebar_links {
-  flex: 1;
-  padding: 0;
+.Sidebar_footer {
+  padding: var(--space-s);
+  font-size: 12px;
+}
+
+.Sidebar_footer a {
+  color: var(--menu-text-color);
+  opacity: 0.1;
+  text-decoration: none;
+}
+
+.Sidebar_footer a:hover {
+  opacity: 0.5;
 }
 
 .Sidebar_pagination {
@@ -627,7 +626,6 @@ button.Sidebar_toggle:hover {
 
 .Auth {
   margin: var(--space-l) auto;
-  width: 320px;
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
@@ -635,6 +633,7 @@ button.Sidebar_toggle:hover {
 
 .Auth input {
   padding: var(--space-s);
+  width: 100%;
 }
 
 .Auth button {
@@ -645,10 +644,14 @@ button.Sidebar_toggle:hover {
   cursor: not-allowed;
 }
 
+.Auth button[type="submit"] {
+  margin: var(--space-s) 0;
+}
+
 button.Auth_textButton {
-  background: none;
+  background: none !important;
   border: none;
-  color: var(--accent-color);
+  color: var(--text-primary);
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
@@ -758,42 +761,6 @@ button.Auth_textButton {
   color: var(--color-text);
 }
 
-/* Layout */
-.Header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.Header h1 {
-  margin: 0;
-  flex: 1;
-}
-
-.Header_logo {
-  background-color: #fff;
-  border-radius: var(--radius);
-  border: 1px solid #fff;
-}
-
-.Header_logout {
-  margin-left: auto;
-}
-
-.Footer {
-  text-align: center;
-  padding: var(--space-m) var(--space-m);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-}
-
-.Footer a {
-  color: var(--color-text);
-}
-
 .Links {
   list-style: none;
   margin: 0;
@@ -802,20 +769,9 @@ button.Auth_textButton {
 
 .Links_row {
   display: flex;
-  gap: var(--space-m);
+  flex-wrap: wrap;
+  gap: var(--space-s);
   justify-content: center;
-}
-
-.AuthView,
-.SpacesView {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
-}
-
-.AuthView_main,
-.SpacesView_main {
-  padding: var(--space-l) var(--space-l);
 }
 
 .RemoteCursor {
@@ -832,4 +788,56 @@ button.Auth_textButton {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   transition: left 0.1s linear, top 0.1s linear;
+}
+
+/* Modal styles */
+.Modal_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.Modal_content {
+  background: var(--color-surface);
+  padding: var(--space-l);
+  border-radius: 8px;
+  position: relative;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.Modal_content h2 {
+  margin: 0 0 var(--space-m);
+  text-align: center;
+}
+
+.Modal_close {
+  position: absolute;
+  top: var(--space-s);
+  right: var(--space-s);
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text);
+  line-height: 1;
+  padding: var(--space-s);
+}
+
+.Modal_close:hover {
+  opacity: 0.7;
+}
+
+/* Adjust Auth styles within modal */
+.Modal_content .Auth {
+  margin: 0;
+  width: 100%;
 }

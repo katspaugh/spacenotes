@@ -6,7 +6,7 @@ import { useDocument } from '../context/DocumentContext.js'
 
 export function Editor() {
   const state = useDocument()
-  const { doc, cursors, clientId, onCursorMove, onNodeCreate, onNodeDelete, onNodeUpdate, onConnect, onDisconnect, onBackgroundColorChange, onTitleChange, onFork, isLocked, onShareSession, isOwner } = state
+  const { doc, cursors, clientId, onCursorMove, onNodeCreate, onNodeDelete, onNodeUpdate, onConnect, onDisconnect, onBackgroundColorChange, onTitleChange, onFork, isLocked, onShareSession, isOwner, onPostLoginSave } = state
 
   return (
     <ImageDrop
@@ -37,6 +37,7 @@ export function Editor() {
         title={doc.title}
         onShareSession={onShareSession}
         isOwner={isOwner}
+        onLoginSuccess={onPostLoginSave}
       />
     </ImageDrop>
   )

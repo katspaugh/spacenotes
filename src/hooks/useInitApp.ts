@@ -67,20 +67,34 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
     }
   }, [setDoc])
 
+  // Check if user has made changes
+  const hasUnsavedChanges = stringDoc !== originalDoc.current
+
   // Save or offer to fork on unload
   useBeforeUnload(useCallback((e: BeforeUnloadEvent) => {
-    if (isOwner) {
-      if (doc.id && doc.title && stringDoc !== originalDoc.current) {
+    const hasChanges = stringDoc !== originalDoc.current
+
+    // Case 1: User is owner and logged in - auto-save
+    if (isOwner && userId) {
+      if (doc.id && doc.title && hasChanges) {
         if (session?.access_token) {
           saveDocBeacon(doc, session.access_token, userId)
-        } else if (userId) {
+        } else {
           saveDoc(doc, userId).catch((err) => console.error('Error saving doc', err))
         }
       }
       return
     }
 
-    if (!sessionToken && stringDoc !== originalDoc.current) {
+    // Case 2: User is NOT logged in and has made changes - show browser confirm
+    if (!userId && hasChanges) {
+      e.preventDefault()
+      e.returnValue = 'You have unsaved changes. Sign in to save your work!'
+      return
+    }
+
+    // Case 3: Non-owner trying to close (existing fork logic)
+    if (!sessionToken && hasChanges) {
       const shouldFork = window.confirm('Fork this space to your account?')
       if (shouldFork) {
         if (userId) {
@@ -92,7 +106,6 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
           }
         } else {
           localStorage.setItem(PENDING_FORK_KEY, JSON.stringify(doc))
-          window.location.href = '/'
         }
         e.preventDefault()
         e.returnValue = ''
@@ -154,5 +167,38 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
     }
   }, [stringDoc, isOwner, sessionToken, onFork, setDoc])
 
-  return { onFork, onTitleChange, isLocked, isOwner }
+  // Post-login save handler - saves the current space to the user's account
+  const onPostLoginSave = useCallback(() => {
+    if (!userId || !doc.id) return
+
+    // Check if we have unsaved changes
+    if (stringDoc === originalDoc.current) return
+
+    // If no title, prompt for one
+    if (!doc.title) {
+      const title = window.prompt('Enter a title for your space:')
+      if (title) {
+        const updatedDoc = { ...doc, title, userId }
+        saveDoc(updatedDoc, userId)
+          .then(() => {
+            setDoc(updatedDoc)
+            setUrlId(updatedDoc.id, updatedDoc.title)
+            originalDoc.current = JSON.stringify(updatedDoc)
+          })
+          .catch((err) => console.error('Error saving doc', err))
+      }
+      return
+    }
+
+    // Has title, auto-save
+    const updatedDoc = { ...doc, userId }
+    saveDoc(updatedDoc, userId)
+      .then(() => {
+        setDoc(updatedDoc)
+        originalDoc.current = JSON.stringify(updatedDoc)
+      })
+      .catch((err) => console.error('Error saving doc', err))
+  }, [doc, userId, stringDoc, setDoc])
+
+  return { onFork, onTitleChange, isLocked, isOwner, hasUnsavedChanges, onPostLoginSave }
 }

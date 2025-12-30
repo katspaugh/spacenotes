@@ -5,6 +5,7 @@ import { signOut } from '../services/supabaseService.js'
 import { listDocsPage } from '../lib/dinky-api.js'
 import { Links } from './Links.js'
 import { useSession } from '@supabase/auth-helpers-react'
+import { LoginModal } from './LoginModal.js'
 
 type SidebarProps = {
   isLocked?: boolean
@@ -13,12 +14,14 @@ type SidebarProps = {
   onTitleChange: (title: string) => void
   onShareSession: () => void
   isOwner?: boolean
+  onLoginSuccess?: () => void
 }
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 100
 
-export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession, isOwner }: SidebarProps) {
+export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession, isOwner, onLoginSuccess }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [docs, setDocs] = useState([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -92,8 +95,17 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession
   }, [])
 
   const onSignIn = useCallback(() => {
-    window.location.href = '/'
+    setIsLoginModalOpen(true)
   }, [])
+
+  const onCloseLoginModal = useCallback(() => {
+    setIsLoginModalOpen(false)
+  }, [])
+
+  const handleLoginSuccess = useCallback(() => {
+    setIsLoginModalOpen(false)
+    onLoginSuccess?.()
+  }, [onLoginSuccess])
 
   return (
     <aside className={`Sidebar${isLocked ? ' Sidebar_locked' : ''}`}>
@@ -106,7 +118,7 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession
         style={{ transform: `translateX(${isOpen ? 0 : '100%'})` }}
         onClick={stopPropagation}
       >
-        <h1><a href="/">SpaceNotes</a></h1>
+        <h1>Space Notes</h1>
 
         {toggleButton}
 
@@ -115,7 +127,7 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession
         {userId && (
           <div className="Sidebar_actions">
             <a href={makeUrl(Math.random().toString(36).slice(2))}>
-              <button>＋New space</button>
+              <button>New space</button>
             </a>
             {isOwner && (
               <button onClick={onShareSession}>Share session</button>
@@ -146,8 +158,6 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession
 
         {divider}
 
-        <Links direction="column" />
-
         {userId ? (
           <button className="Sidebar_logout" onClick={onSignOut}>
             Sign out
@@ -157,7 +167,19 @@ export function Sidebar({ isLocked, title, onFork, onTitleChange, onShareSession
             Sign in / Sign up
           </button>
         )}
+
+        {divider}
+
+        <div className="Sidebar_footer">
+          <Links direction="row" />
+        </div>
       </div>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={onCloseLoginModal}
+        onSuccess={handleLoginSuccess}
+      />
     </aside>
   )
 }
