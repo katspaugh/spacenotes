@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getUrlId, setUrlId } from '../lib/url'
 import { loadDoc, saveDoc, saveDocBeacon } from '../lib/dinky-api'
 import { useBeforeUnload } from './useBeforeUnload'
@@ -13,6 +13,7 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
   const { doc, setDoc, sessionToken } = state as ReturnType<typeof useDocState> & { sessionToken: string }
   const stringDoc = useMemo(() => JSON.stringify(doc), [doc])
   const originalDoc = useRef(stringDoc)
+  const [isLoading, setIsLoading] = useState(!!getUrlId())
   // Init user session
   const session = useSession()
   const userId = session?.user?.id || ''
@@ -54,8 +55,12 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
               originalDoc.current = JSON.stringify(newDoc)
               setDoc(newDoc)
               setUrlId(newDoc.id, newDoc.title)
+              setIsLoading(false)
             })
-            .catch((err) => console.error('Error loading doc', err))
+            .catch((err) => {
+              console.error('Error loading doc', err)
+              setIsLoading(false)
+            })
           return { ...prevDoc, id }
         }
         return prevDoc
@@ -64,6 +69,7 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
       const newId = randomId()
       setDoc((prevDoc) => ({ ...prevDoc, id: newId }))
       setUrlId(newId)
+      setIsLoading(false)
     }
   }, [setDoc])
 
@@ -149,6 +155,7 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
 
   const forkTimer = useRef<number | null>(null)
   useEffect(() => {
+    if (isLoading) return
     if (isOwner || sessionToken) return
     if (stringDoc === originalDoc.current) return
     if (forkTimer.current) window.clearTimeout(forkTimer.current)
@@ -165,7 +172,7 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
     return () => {
       if (forkTimer.current) window.clearTimeout(forkTimer.current)
     }
-  }, [stringDoc, isOwner, sessionToken, onFork, setDoc])
+  }, [stringDoc, isOwner, sessionToken, onFork, setDoc, isLoading])
 
   // Post-login save handler - saves the current space to the user's account
   const onPostLoginSave = useCallback(() => {
