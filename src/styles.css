@@ -241,8 +241,9 @@ textarea:focus {
   right: var(--space-m);
   z-index: 50;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: var(--space-m);
   pointer-events: none;
 }
 
@@ -307,24 +308,6 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: var(--space-s);
-}
-
-.ShareBtn {
-  background: var(--accent-primary);
-  border: none;
-  border-radius: var(--radius);
-  padding: 8px 16px;
-  color: white;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  transition: all 0.15s ease;
-}
-
-.ShareBtn:hover {
-  background: #2563EB;
-  color: white;
 }
 
 .MenuBtn {

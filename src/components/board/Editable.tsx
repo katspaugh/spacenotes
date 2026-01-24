@@ -102,8 +102,6 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     }
   }, [content, onChange])
 
-  useEffect(updateHeight, [updateHeight])
-
   const style = useMemo(() => ({
     width: width || INITIAL_WIDTH,
     height: isManualHeight ? height + 'px' : undefined,
