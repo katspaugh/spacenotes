@@ -50,17 +50,16 @@ export function randomBrightColor() {
 }
 
 export function randomPastelColor() {
-  // Same pastel colors as ColorPicker, excluding the first off-white color
+  // Pastel colors matching the new design
   const PASTEL_COLORS = [
-    '#ffe8ed',
-    '#d6e2e7',
-    '#bbeebb',
-    '#fefeca',
-    '#e1d8f0',
-    '#ffd9a3',
-    '#d9f3e6',
-    '#BFE8FE',
-    '#fff2d9',
+    '#FEF3C7', // Yellow
+    '#E0E7FF', // Purple/Indigo
+    '#D1FAE5', // Green
+    '#FCE7F3', // Pink
+    '#FEE2E2', // Red
+    '#DBEAFE', // Blue
+    '#E5E7EB', // Gray
+    '#FEF9C3', // Light yellow
   ]
   return PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)]
 }

@@ -36,7 +36,7 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
         <button className="Modal_close" onClick={onClose}>
           &times;
         </button>
-        <h2>Sign in to Space Notes</h2>
+        <h2>Sign in to SpaceNotes</h2>
         <Auth onSuccess={onSuccess} />
       </div>
     </div>

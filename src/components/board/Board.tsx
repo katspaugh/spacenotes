@@ -25,6 +25,12 @@ type BoardProps = {
   onCursorMove: (x: number, y: number) => void
   selections: Record<string, string[]>
   onSelectNodes: (ids: string[]) => void
+  // Floating header props
+  title?: string
+  onTitleChange?: (title: string) => void
+  onToggleSidebar?: () => void
+  onShareSession?: () => void
+  isOwner?: boolean
 }
 
 const WIDTH = 5000
@@ -203,6 +209,14 @@ export function Board(props: BoardProps) {
 
   const sx = useMemo(() => ({ width: `${WIDTH}px`, height: `${HEIGHT}px` }), [])
 
+  const onTitleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    props.onTitleChange?.(e.target.value)
+  }, [props.onTitleChange])
+
+  const stopPropagationClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+  }, [])
+
   return (
     <div
       className={`Board ${props.isLocked ? 'Board_locked' : ''}`}
@@ -210,6 +224,41 @@ export function Board(props: BoardProps) {
       onClick={onBoardClick}
       onDoubleClick={onBoardDblClick}
     >
+      {/* Floating Header */}
+      <div className="FloatingHeader" onClick={stopPropagationClick}>
+        <div className="LogoFloat">
+          <div className="LogoIcon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+          </div>
+          <span className="LogoText">SpaceNotes</span>
+          <input
+            className="TitleInput"
+            value={props.title ?? ''}
+            onChange={onTitleInput}
+            placeholder="Untitled space"
+          />
+        </div>
+        <div className="HeaderActions">
+          {props.isOwner && (
+            <button className="ShareBtn" onClick={props.onShareSession}>
+              Share
+            </button>
+          )}
+          <button className="MenuBtn" onClick={props.onToggleSidebar}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       {props.nodes?.map(renderNode)}
 
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>

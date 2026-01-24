@@ -54,7 +54,7 @@ export function saveDocBeacon(data: DinkyDataV2, accessToken: string, userId: st
     keepalive: true,
   })
 }
-export type SpaceMeta = { id: string; title?: string, backgroundColor?: string }
+export type SpaceMeta = { id: string; title?: string; backgroundColor?: string; updated_at?: string }
 
 export async function listDocsPage(userId: string, page = 1, perPage = 12): Promise<{ spaces: SpaceMeta[]; total: number }> {
   if (!userId) {
@@ -63,34 +63,46 @@ export async function listDocsPage(userId: string, page = 1, perPage = 12): Prom
 
   const from = (page - 1) * perPage
   const to = from + perPage - 1
-  const makeQuery = () =>
+
+  // Try with updated_at first, fallback to without if column doesn't exist
+  const makeQueryWithTimestamp = () =>
+    supabase
+      .from('documents')
+      .select('id, data, updated_at', { count: 'exact' })
+      .eq('user_id', userId)
+
+  const makeQueryWithoutTimestamp = () =>
     supabase
       .from('documents')
       .select('id, data', { count: 'exact' })
       .eq('user_id', userId)
 
-  let { data, count, error } = await makeQuery()
+  let { data, count, error } = await makeQueryWithTimestamp()
     .order('updated_at', { ascending: false })
-    .order('created_at', { ascending: false })
     .range(from, to)
 
+  // Fallback if updated_at column doesn't exist
   if (error?.code === '42703') {
-    ({ data, count, error } = await makeQuery().range(from, to))
+    const fallback = await makeQueryWithoutTimestamp().range(from, to)
+    data = fallback.data as typeof data
+    count = fallback.count
+    error = fallback.error
   }
 
   if (error || !data) {
     throw error || new Error('Unable to load documents')
   }
-  const spaces = data.map((row: { id: string; data: string }) => {
+  const spaces = data.map((row: { id: string; data: string; updated_at?: string }) => {
     try {
       const parsed = JSON.parse(row.data)
       return {
         id: row.id,
         title: parsed.title || stripHtml(parsed.nodes[0]?.content || ''),
         backgroundColor: parsed.backgroundColor,
+        updated_at: row.updated_at,
       } as SpaceMeta
     } catch {
-      return { id: row.id } as SpaceMeta
+      return { id: row.id, updated_at: row.updated_at } as SpaceMeta
     }
   })
   return { spaces, total: count || spaces.length }

@@ -1,64 +1,83 @@
 :root {
   /* Typography */
-  --font-family: 'Mulish', Avenir, Helvetica, Arial, sans-serif;
+  --font-family: 'Inter', 'Mulish', Avenir, Helvetica, Arial, sans-serif;
   --font-family-cards: 'Nunito Sans', Avenir, Helvetica, Arial, sans-serif;
   --font-size: 16px;
 
   /* Spacing */
+  --space-xs: 0.25rem;
   --space-s: 0.5rem;
   --space-m: 1rem;
-  --space-l: 2rem;
+  --space-l: 1.5rem;
+  --space-xl: 2rem;
 
-  /* Colors */
-  --color-background: #f9fafb;
-  --color-surface: #ffffff;
-  --color-text: #222222;
-  --color-muted: #666666;
-  --color-primary: #6366f1;
-  --color-border: #e5e7eb;
+  /* Light mode colors */
+  --bg-primary: #F8F7F4;
+  --bg-surface: #FFFFFF;
+  --bg-muted: #EDECEA;
+  --text-primary: #1A1918;
+  --text-secondary: #6D6C6A;
+  --text-tertiary: #9C9B99;
+  --border-subtle: #E5E4E1;
+  --border-strong: #D1D0CD;
+  --accent-primary: #3B82F6;
+  --accent-light: #DBEAFE;
+  --accent-indigo: #6366F1;
+  --shadow-color: rgba(26, 25, 24, 0.08);
+  --shadow-strong: rgba(26, 25, 24, 0.15);
 
-  /* Existing variable mapping */
-  --overlay-color: rgba(255, 255, 255, 0.6);
-  --accent-color: var(--color-primary);
-  --connector-color: #f3aeac;
-  --edge-color: var(--color-primary);
-  --button-color: var(--color-surface);
-  --button-active-color: #ececec;
-  --button-color-border: #333;
-  --menu-background-color: var(--color-surface);
-  --menu-text-color: var(--color-text);
-  --menu-hover-color: #f1f1f1;
-  --menu-hover-text-color: var(--color-text);
-  --card-color: var(--color-surface);
-  --card-text-color: #333;
-  --card-hover-color: #f8f8f8;
-  --card-border: #555;
-  --shadow-color: rgba(0, 0, 0, 0.15);
-  --grid-dot-color: #bdbdbd;
+  /* Legacy variable mapping for compatibility */
+  --color-background: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-text: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-primary: var(--accent-primary);
+  --color-border: var(--border-subtle);
+  --overlay-color: var(--bg-primary);
+  --accent-color: var(--accent-indigo);
+  --connector-color: var(--accent-indigo);
+  --edge-color: var(--accent-indigo);
+  --button-color: var(--bg-surface);
+  --button-active-color: var(--bg-muted);
+  --button-color-border: var(--border-subtle);
+  --menu-background-color: var(--bg-surface);
+  --menu-text-color: var(--text-primary);
+  --menu-hover-color: var(--bg-muted);
+  --menu-hover-text-color: var(--text-primary);
+  --card-color: var(--bg-surface);
+  --card-text-color: #1A1918;
+  --card-hover-color: var(--bg-muted);
+  --card-border: transparent;
+  --grid-dot-color: #D1D0CD;
   --radius: 6px;
+  --radius-lg: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #0f172a;
-    --color-surface: #1e293b;
-    --color-text: #f4f4f4;
-    --color-border: #555;
-    --color-muted: #9ca3af;
-    --color-primary: #8b5cf6;
+    /* Dark mode colors */
+    --bg-primary: #0F172A;
+    --bg-surface: #1E293B;
+    --bg-muted: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-tertiary: #64748B;
+    --border-subtle: #334155;
+    --border-strong: #475569;
+    --accent-primary: #3B82F6;
+    --accent-light: #312E81;
+    --accent-indigo: #818CF8;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-strong: rgba(0, 0, 0, 0.5);
 
-    --overlay-color: rgba(0, 0, 0, 0.3);
-    --accent-color: var(--color-primary);
-    --edge-color: var(--color-primary);
-    --menu-background-color: var(--color-surface);
-    --menu-text-color: var(--color-text);
-    --menu-hover-color: #374151;
-    --menu-hover-text-color: var(--color-text);
-    --card-color: #dadada;
-    --button-color: #334155;
-    --button-active-color: #475569;
-    --button-color-border: #475569;
-    --color-border: var(--color-border);
+    /* Legacy mapping */
+    --overlay-color: var(--bg-primary);
+    --menu-hover-color: var(--bg-muted);
+    --button-color: var(--bg-muted);
+    --button-active-color: var(--border-strong);
+    --button-color-border: var(--border-strong);
+    --card-color: #e8e8e8;
+    --card-text-color: #1A1918;
     --grid-dot-color: #334155;
   }
 }
@@ -70,8 +89,8 @@ body {
   font-family: var(--font-family);
   font-size: var(--font-size);
   overscroll-behavior: none;
-  color: var(--color-text);
-  background-color: var(--color-background);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
   user-select: none;
   width: 100vw;
   height: 100vh;
@@ -91,7 +110,7 @@ body {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--accent-primary);
   text-decoration: none;
 }
 
@@ -112,8 +131,9 @@ button {
   border-radius: var(--radius);
   padding: var(--space-s) var(--space-m);
   cursor: pointer;
-  transition: background-color 0.2s;
-  color: var(--color-text);
+  transition: all 0.15s ease;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 button:hover:not([disabled]) {
@@ -127,23 +147,64 @@ button:active:not([disabled]) {
 
 button[disabled] {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.5;
+}
+
+/* Primary button style */
+.Button_primary {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.Button_primary:hover:not([disabled]) {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: white;
+}
+
+/* Secondary button style */
+.Button_secondary {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+}
+
+.Button_secondary:hover:not([disabled]) {
+  background: var(--bg-muted);
 }
 
 input,
 textarea {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: var(--space-s) var(--space-s);
+  padding: var(--space-s);
+  color: var(--text-primary);
 }
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+/* ========================================
+   Board / Canvas
+======================================== */
 
 .Board {
   position: relative;
   z-index: 1;
+  background-color: rgba(255, 255, 255, 0.6);
   background-image: radial-gradient(circle, var(--grid-dot-color) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-color: var(--overlay-color);
+  background-size: 24px 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .Board {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
 }
 
 .Board > svg {
@@ -169,20 +230,501 @@ textarea {
   display: none;
 }
 
-.Sidebar_locked .Sidebar_toggle::before {
-  content: '🔒';
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  font-size: 12px;
-  background: var(--button-color);
-  border: 1px solid var(--button-color-border);
-  border-radius: 50%;
-  padding: 2px;
-  width: 16px;
-  height: 16px;
+/* ========================================
+   Floating Header
+======================================== */
+
+.FloatingHeader {
+  position: fixed;
+  top: var(--space-m);
+  left: var(--space-m);
+  right: var(--space-m);
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
 }
 
+.FloatingHeader > * {
+  pointer-events: auto;
+}
+
+.LogoFloat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  background: var(--bg-surface);
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 12px var(--shadow-color), 0 1px 3px var(--shadow-color);
+}
+
+.LogoIcon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.LogoIcon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+.LogoText {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.TitleInput {
+  background: var(--bg-muted);
+  border: none;
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.TitleInput:focus {
+  outline: none;
+  background: var(--bg-muted);
+}
+
+.TitleInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.HeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.ShareBtn {
+  background: var(--accent-primary);
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  transition: all 0.15s ease;
+}
+
+.ShareBtn:hover {
+  background: #2563EB;
+  color: white;
+}
+
+.MenuBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--bg-surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  box-shadow: 0 2px 12px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.MenuBtn:hover {
+  background: var(--bg-muted);
+}
+
+.MenuBtn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-primary);
+}
+
+/* ========================================
+   Sidebar / Menu Panel
+======================================== */
+
+.Sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.Sidebar_locked .MenuBtn::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+}
+
+.Sidebar_drawer {
+  background: var(--bg-surface);
+  width: 320px;
+  height: 100vh;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  box-shadow: -4px 0 24px var(--shadow-color);
+}
+
+.MenuHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-m) var(--space-l);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.MenuHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.MenuHeaderLeft .LogoIcon {
+  width: 32px;
+  height: 32px;
+}
+
+.MenuTitle {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.CloseBtn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.CloseBtn:hover {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+
+.CloseBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.MenuActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-l);
+}
+
+.MenuActions .Button_primary {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: var(--radius);
+}
+
+.MenuActions .Button_secondary {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: var(--radius);
+}
+
+.SearchBar {
+  margin: 0 var(--space-l) var(--space-l);
+  position: relative;
+}
+
+.SearchBar input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  background: var(--bg-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.SearchBar input:focus {
+  border-color: var(--accent-primary);
+  background: var(--bg-surface);
+}
+
+.SearchBar input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.SearchBar svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.SpacesSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.SpacesSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-l) var(--space-s);
+}
+
+.SpacesSectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.SpacesCount {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--bg-muted);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+}
+
+.SpacesList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-s);
+}
+
+.SpaceItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space-s);
+  margin: 2px 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.SpaceItem:hover {
+  background: var(--bg-muted);
+  text-decoration: none;
+}
+
+.SpaceItem_active {
+  background: var(--accent-light);
+}
+
+.SpaceItem_active:hover {
+  background: var(--accent-light);
+}
+
+.SpaceItemIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.SpaceItemContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.SpaceItemTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.SpaceItemMeta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.Sidebar_pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space-l);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.Sidebar_pagination button {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.Sidebar_pagination span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.MenuFooter {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-m) var(--space-l);
+}
+
+.UserSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+
+.UserAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.UserInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.UserName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.UserEmail {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.SignOutBtn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  padding: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.SignOutBtn:hover {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+
+/* Legacy sidebar input - hide since we moved title to header */
+.Sidebar > input {
+  display: none;
+}
+
+/* Legacy sidebar toggle button - replaced by MenuBtn */
+button.Sidebar_toggle {
+  display: none;
+}
+
+/* Legacy styles kept for compatibility */
+.Sidebar_actions {
+  display: none;
+}
+
+.Sidebar h1 {
+  display: none;
+}
+
+.Sidebar hr {
+  display: none;
+}
+
+.Sidebar_links {
+  display: none;
+}
+
+.Sidebar_scrollable {
+  display: none;
+}
+
+.Sidebar_empty {
+  display: none;
+}
+
+.Sidebar_footer {
+  display: none;
+}
+
+.Sidebar_logout {
+  display: none;
+}
+
+.Sidebar_signin {
+  display: none;
+}
+
+.ForkButton {
+  display: none;
+}
+
+/* ========================================
+   Cards / Nodes
+======================================== */
 
 .DraggableNode {
   position: absolute;
@@ -190,50 +732,62 @@ textarea {
 }
 
 .DraggableNode_selected .Card {
-  outline: 2px solid var(--accent-color);
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 1px;
 }
 
 .DraggableNode_remoteSelected .Card {
   outline: 2px solid var(--remote-selection-color);
+  outline-offset: 1px;
 }
 
 .Card {
-  border: 1px solid var(--card-border);
-  border-radius: 6px;
+  border: none;
+  border-radius: var(--radius-lg);
   background-color: var(--card-color);
+  box-shadow: 0 4px 16px var(--shadow-color), 0 1px 4px var(--shadow-color);
+  transition: box-shadow 0.2s ease;
+}
+
+.DraggableNode:hover .Card {
+  box-shadow: 0 8px 24px var(--shadow-strong), 0 2px 8px var(--shadow-color);
 }
 
 .DraggableNode_content {
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .DraggableNode_background {
-  opacity: 0.5;
+  opacity: 0.6;
   z-index: 2;
 }
 
 .DraggableNode:not(.DraggableNode_background) .DraggableNode_content:hover {
-  transform: scale(1.02);
+  transform: scale(1.01);
 }
 
 @keyframes wobble {
   0% {
-    transform: scale(1.02) rotate(0deg);
+    transform: scale(1.01) rotate(0deg);
   }
   25% {
-    transform: scale(1.02) rotate(-0.5deg);
+    transform: scale(1.01) rotate(-0.3deg);
   }
   50% {
-    transform: scale(1.02) rotate(0deg);
+    transform: scale(1.01) rotate(0deg);
   }
   75% {
-    transform: scale(1.02) rotate(0.5deg);
+    transform: scale(1.01) rotate(0.3deg);
   }
 }
 
 .DraggableNode:not(.DraggableNode_background) .DraggableNode_content:active {
-  animation: wobble 0.5s 0.2s infinite;
+  animation: wobble 0.4s 0.2s infinite;
 }
+
+/* ========================================
+   Editable Content
+======================================== */
 
 .Editable {
   min-width: 70px;
@@ -289,13 +843,19 @@ textarea {
 }
 
 .Editable a {
-  color: var(--edge-color);
+  color: var(--accent-primary);
   text-decoration: underline;
 }
 
+/* ========================================
+   Edges / Connections
+======================================== */
+
 .Edge path {
   stroke: var(--edge-color);
-  stroke-width: 4;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   fill: none;
   pointer-events: all;
   cursor: pointer;
@@ -303,40 +863,50 @@ textarea {
 }
 
 .Edge path:hover {
-  stroke: var(--accent-color);
-  stroke-width: 6;
+  stroke: var(--accent-primary);
+  stroke-width: 3;
 }
 
 .Edge circle {
-  fill: var(--connector-color);
+  fill: var(--accent-indigo);
   transition: fill 0.15s ease-out;
 }
+
+/* ========================================
+   Connector
+======================================== */
 
 .Connector {
   position: absolute;
   z-index: 3;
   left: 100%;
   top: 50%;
-  margin-top: -8px;
-  margin-left: -8px;
+  margin-top: -10px;
+  margin-left: -10px;
   border-radius: 50%;
-  border: none;
-  background-color: var(--connector-color) !important;
-  width: 16px;
-  height: 16px;
+  border: 2px solid var(--accent-indigo);
+  background-color: white !important;
+  width: 20px;
+  height: 20px;
   padding: 0;
   cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.15s;
   opacity: 0;
+  box-shadow: 0 2px 6px var(--shadow-color);
 }
 
 .Connector:hover {
   transform: scale(1.2);
+  background-color: var(--accent-indigo) !important;
 }
 
 .DraggableNode:hover .Connector {
   opacity: 1;
 }
+
+/* ========================================
+   Resizer
+======================================== */
 
 .Resizer {
   position: absolute;
@@ -352,7 +922,7 @@ textarea {
 .Resizer:after {
   content: '';
   display: block;
-  background: linear-gradient(135deg, transparent 0%, transparent 50%, var(--color-border) 50%, var(--color-border) 100%);
+  background: linear-gradient(135deg, transparent 0%, transparent 50%, var(--border-strong) 50%, var(--border-strong) 100%);
   width: 10px;
   height: 10px;
   position: absolute;
@@ -363,207 +933,9 @@ textarea {
   border-radius: 0 0 4px 0;
 }
 
-.Sidebar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 100;
-  height: 100vh;
-  display: flex;
-  pointer-events: none;
-}
-
-.Sidebar input {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-s) var(--space-s);
-  font-size: var(--font-size);
-  display: block;
-  height: 36px;
-  margin: var(--space-s) 0;
-  width: 12em;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-  pointer-events: all;
-}
-
-.Sidebar input:focus {
-  opacity: 1;
-}
-
-.Sidebar button {
-  pointer-events: all;
-}
-
-.Sidebar button[disabled] {
-  cursor: not-allowed;
-}
-
-.Sidebar button:not([disabled]):hover {
-  background: var(--menu-hover-color);
-  color: var(--menu-hover-text-color);
-}
-
-.Sidebar button:not([disabled]):active {
-  background: var(--button-active-color);
-}
-
-button.Sidebar_toggle {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  margin: var(--space-s);
-  transition: transform 0.2s;
-  background: url('/logo.png') center center no-repeat;
-  background-size: 100%;
-  transition: filter 0.2s;
-  filter: brightness(1);
-}
-
-button.Sidebar_toggle:hover {
-  background: url('/logo.png') center center no-repeat !important;
-  background-size: 100% !important;
-  filter: brightness(1.2);
-}
-
-.Sidebar_drawer .Sidebar_toggle {
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  top: 0;
-}
-
-.Sidebar_actions {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-s);
-  padding: 0 var(--space-m);
-}
-
-.ForkButton {
-  background: var(--button-color);
-  border: 1px solid var(--button-color-border);
-  border-radius: 8px;
-  padding: 0.5em 1em;
-  margin: 0 var(--space-s);
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.Sidebar_drawer {
-  background: var(--menu-background-color);
-  color: var(--menu-text-color);
-  width: 300px;
-  height: 100vh;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1;
-  transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-  padding-bottom: var(--space-s);
-  pointer-events: all;
-}
-
-.Sidebar h1 {
-  margin: var(--space-s) var(--space-m) var(--space-s);
-}
-
-.Sidebar h1 a {
-  color: inherit;
-}
-
-.Sidebar hr {
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-top: 1px solid var(--color-border);
-}
-
-.Sidebar_links {
-  flex: 1;
-  padding: 0;
-  margin: var(--space-m);
-  list-style: none;
-}
-
-.Sidebar_links li {
-  margin: 0;
-  padding: 0;
-}
-
-.Sidebar_links li * {
-  display: block;
-  font-size: 0.9em;
-  padding: var(--space-s) var(--space-s);
-  color: var(--menu-text-color);
-  text-decoration: none;
-  border-radius: var(--radius);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.Sidebar_links li .Sidebar_current {
-  font-weight: bold;
-}
-
-.Sidebar_links li a:hover {
-  background: var(--menu-hover-color);
-  color: var(--menu-hover-text-color);
-}
-
-.Sidebar_scrollable {
-  overflow: auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.Sidebar_empty {
-  flex: 1;
-}
-
-.Sidebar_footer {
-  padding: var(--space-s);
-  font-size: 12px;
-}
-
-.Sidebar_footer a {
-  color: var(--menu-text-color);
-  opacity: 0.1;
-  text-decoration: none;
-}
-
-.Sidebar_footer a:hover {
-  opacity: 0.5;
-}
-
-.Sidebar_pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-s);
-  padding: var(--space-s) var(--space-m);
-}
-
-.Sidebar_pagination button {
-  padding: var(--space-s) var(--space-m);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-
-.Sidebar_pagination button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
+/* ========================================
+   Selection Box
+======================================== */
 
 .SelectionBox {
   position: absolute;
@@ -577,31 +949,47 @@ button.Sidebar_toggle:hover {
 .SelectionBox div {
   position: absolute;
   z-index: 1;
-  background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
-  border: 2px solid color-mix(in srgb, var(--accent-color) 50%, transparent);
+  background-color: color-mix(in srgb, var(--accent-indigo) 10%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent-indigo) 40%, transparent);
   user-select: none;
   border-radius: 4px;
 }
 
+/* ========================================
+   Color Picker
+======================================== */
+
 .ColorPicker {
   cursor: pointer;
-  width: 50px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  border: none;
+  border: 2px solid var(--bg-surface);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px var(--shadow-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ColorPicker:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px var(--shadow-strong);
 }
 
 .DraggableNode .ColorPicker {
   position: absolute;
-  top: -2px;
-  right: 0;
+  top: -4px;
+  right: 8px;
   transform: translate(0, -100%);
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.15s;
 }
 
 .DraggableNode:hover .ColorPicker {
   opacity: 1;
+}
+
+.DraggableNode:hover .ColorPicker:hover {
+  transform: translate(0, -100%) scale(1.1);
 }
 
 .Board > .ColorPicker {
@@ -609,170 +997,16 @@ button.Sidebar_toggle:hover {
   position: fixed;
   top: auto;
   left: auto;
-  bottom: 10px;
-  right: 10px;
-}
-/* Mobile */
-@media (min-width: 600px) {
-  .Board > .ColorPicker {
-    width: 70px;
-    height: 30px;
-  }
+  bottom: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
-.Drop__dragover {
-  background: rgba(100, 0, 100, 0.1);
-}
-
-.Auth {
-  margin: var(--space-l) auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.Auth input {
-  padding: var(--space-s);
-  width: 100%;
-}
-
-.Auth button {
-  padding: var(--space-s) var(--space-m);
-}
-
-.Auth button[disabled] {
-  cursor: not-allowed;
-}
-
-.Auth button[type="submit"] {
-  margin: var(--space-s) 0;
-}
-
-button.Auth_textButton {
-  background: none !important;
-  border: none;
-  color: var(--text-primary);
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.Auth_loader {
-  text-align: center;
-}
-
-.Auth_message {
-  color: green;
-}
-
-.Auth_error {
-  color: red;
-}
-
-.Sidebar_logout {
-  margin: 0 var(--space-l);
-}
-
-.Sidebar_signin {
-  margin: 0 var(--space-l);
-}
-
-.Spaces {
-  padding: var(--space-l);
-}
-
-.Spaces_grid {
-  margin: 0 auto;
-  max-width: 1200px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  grid-auto-rows: 160px;
-  gap: var(--space-l);
-}
-
-.Spaces_pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-m);
-  margin-top: var(--space-l);
-}
-
-.Spaces_pagination button {
-  padding: var(--space-s) var(--space-m);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-
-.Spaces_pagination button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.SpaceCard {
-  display: block;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: inherit;
-  text-decoration: none;
-  padding: var(--space-m);
-  transition: background-color 0.2s;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.SpaceCard:hover {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.SpaceCardWrapper {
-  position: relative;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  color: var(--card-text-color);
-}
-
-.SpaceCardWrapper_new {
-  font-size: 20px;
-  font-weight: bold;
-  border-style: dashed;
-}
-
-.SpaceCard_delete {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  border: none;
-  background: transparent;
-  color: var(--color-muted);
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  padding: 4px;
-}
-
-.SpaceCard_delete:hover {
-  color: var(--color-text);
-}
-
-.Links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.Links_row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-s);
-  justify-content: center;
-}
+/* ========================================
+   Remote Cursors
+======================================== */
 
 .RemoteCursor {
   position: absolute;
@@ -790,7 +1024,192 @@ button.Auth_textButton {
   transition: left 0.1s linear, top 0.1s linear;
 }
 
-/* Modal styles */
+/* ========================================
+   Auth
+======================================== */
+
+.Auth {
+  margin: var(--space-xl) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  max-width: 360px;
+}
+
+.Auth input {
+  padding: 12px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.Auth button {
+  padding: 12px var(--space-m);
+  border-radius: var(--radius);
+}
+
+.Auth button[disabled] {
+  cursor: not-allowed;
+}
+
+.Auth button[type="submit"] {
+  margin: var(--space-s) 0;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.Auth button[type="submit"]:hover:not([disabled]) {
+  background: #2563EB;
+  border-color: #2563EB;
+}
+
+button.Auth_textButton {
+  background: none !important;
+  border: none;
+  color: var(--accent-primary);
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.Auth_loader {
+  text-align: center;
+}
+
+.Auth_message {
+  color: #059669;
+}
+
+.Auth_error {
+  color: #DC2626;
+}
+
+/* ========================================
+   Spaces Page
+======================================== */
+
+.Spaces {
+  padding: var(--space-xl);
+}
+
+.Spaces_grid {
+  margin: 0 auto;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-auto-rows: 180px;
+  gap: var(--space-l);
+}
+
+.Spaces_pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-m);
+  margin-top: var(--space-xl);
+}
+
+.Spaces_pagination button {
+  padding: var(--space-s) var(--space-m);
+}
+
+.Spaces_pagination button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.SpaceCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: inherit;
+  text-decoration: none;
+  padding: var(--space-m);
+  transition: all 0.2s ease;
+  background: var(--bg-surface);
+  height: 100%;
+  font-weight: 500;
+}
+
+.SpaceCard:hover {
+  text-decoration: none;
+}
+
+.SpaceCardWrapper {
+  position: relative;
+  border: none;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  color: var(--card-text-color);
+  box-shadow: 0 4px 16px var(--shadow-color);
+  transition: all 0.2s ease;
+}
+
+.SpaceCardWrapper:hover {
+  box-shadow: 0 8px 24px var(--shadow-strong);
+  transform: translateY(-2px);
+}
+
+.SpaceCardWrapper_new {
+  font-size: 18px;
+  font-weight: 600;
+  border: 2px dashed var(--border-strong);
+  box-shadow: none;
+  background: var(--bg-muted);
+}
+
+.SpaceCardWrapper_new:hover {
+  border-color: var(--accent-primary);
+  box-shadow: none;
+}
+
+.SpaceCard_delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 6px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.SpaceCardWrapper:hover .SpaceCard_delete {
+  opacity: 1;
+}
+
+.SpaceCard_delete:hover {
+  color: #DC2626;
+  background: #FEE2E2;
+}
+
+/* ========================================
+   Links
+======================================== */
+
+.Links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.Links_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  justify-content: center;
+}
+
+/* ========================================
+   Modal
+======================================== */
+
 .Modal_overlay {
   position: fixed;
   top: 0;
@@ -801,22 +1220,24 @@ button.Auth_textButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
 }
 
 .Modal_content {
-  background: var(--color-surface);
-  padding: var(--space-l);
-  border-radius: 8px;
+  background: var(--bg-surface);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
   position: relative;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px var(--shadow-strong);
 }
 
 .Modal_content h2 {
   margin: 0 0 var(--space-m);
   text-align: center;
+  font-size: 20px;
 }
 
 .Modal_close {
@@ -827,17 +1248,27 @@ button.Auth_textButton {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: var(--color-text);
+  color: var(--text-secondary);
   line-height: 1;
   padding: var(--space-s);
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
 .Modal_close:hover {
-  opacity: 0.7;
+  background: var(--bg-muted);
+  color: var(--text-primary);
 }
 
-/* Adjust Auth styles within modal */
 .Modal_content .Auth {
   margin: 0;
   width: 100%;
+}
+
+/* ========================================
+   Drop Zone
+======================================== */
+
+.Drop__dragover {
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
 }
