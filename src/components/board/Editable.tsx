@@ -38,12 +38,29 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
     }
   }, [content])
 
+  const initialHeightSet = useRef(false)
+
   // Update height based on content changes
   const updateHeight = useCallback(() => {
     if (!isManualHeight && ref.current) {
       onHeightChange(ref.current.offsetHeight + 0.01)
     }
   }, [onHeightChange, isManualHeight])
+
+  // Calculate height on initial render for cards with content
+  useEffect(() => {
+    if (initialHeightSet.current) return
+    if (content && !isManualHeight) {
+      initialHeightSet.current = true
+      // Use requestAnimationFrame to ensure DOM has rendered
+      const raf = requestAnimationFrame(() => {
+        if (ref.current) {
+          onHeightChange(ref.current.offsetHeight + 0.01)
+        }
+      })
+      return () => cancelAnimationFrame(raf)
+    }
+  }, [content, isManualHeight, onHeightChange])
 
   // Blur event handler to sanitize content and update height
   const onBlur = useCallback((e) => {
