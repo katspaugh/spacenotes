@@ -244,7 +244,7 @@ export function useRealtimeDocState() {
       .writeText(url.toString())
       .then(() => {
         alert(
-          'Share link is copied, please share it with your peers to collaborate on the current space.',
+          'Invite link copied! Share it with others to collaborate on this space.',
         )
       })
       .catch((err) => console.error('Error copying session link', err))

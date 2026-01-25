@@ -30,6 +30,7 @@ type BoardProps = {
   onTitleChange?: (title: string) => void
   onToggleSidebar?: () => void
   onShareSession?: () => void
+  onShare?: () => void
   isOwner?: boolean
 }
 
@@ -141,10 +142,11 @@ export function Board(props: BoardProps) {
           onClick={onNodeClick}
           selected={selectedNodes.includes(node.id)}
           selectedByColor={remoteSelectionColor[node.id]}
+          isLocked={props.isLocked}
         />
       )
     },
-    [onNodeUpdate, selectedNodes, onConnectStart, onNodeClick, remoteSelectionColor],
+    [onNodeUpdate, selectedNodes, onConnectStart, onNodeClick, remoteSelectionColor, props.isLocked],
   )
 
   const renderEdge = useCallback(
@@ -241,14 +243,25 @@ export function Board(props: BoardProps) {
             value={props.title ?? ''}
             onChange={onTitleInput}
             placeholder="Untitled space"
+            readOnly={props.isLocked}
           />
-        </div>
-        <div className="HeaderActions">
-          {props.isOwner && (
-            <button className="ShareBtn" onClick={props.onShareSession}>
-              Share
-            </button>
+          {props.isLocked && (
+            <div className="LockIndicator" title="View only - you don't have edit access">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
           )}
+        </div>
+        <button className="ShareFloat" onClick={props.onShare} title="Copy link to clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
+        </button>
+        <div className="HeaderActions">
           <button className="MenuBtn" onClick={props.onToggleSidebar}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="12" x2="21" y2="12" />

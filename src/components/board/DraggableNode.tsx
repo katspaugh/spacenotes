@@ -13,6 +13,7 @@ type DraggableNodeProps = CanvasNode & {
   onClick: (id: string) => void
   selected: boolean
   selectedByColor?: string
+  isLocked?: boolean
 }
 
 const BG_THRESHOLD = 110e3
@@ -156,7 +157,7 @@ export function DraggableNode(props: DraggableNodeProps) {
 
         <Connector onClick={onConnectStart} />
 
-        <Resizer onResize={onResize} onReset={onResizeReset} />
+        {!props.isLocked && <Resizer onResize={onResize} onReset={onResizeReset} />}
 
         <ColorPicker color={props.color} onColorChange={onColorChange} />
       </div>

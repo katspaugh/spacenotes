@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { getUrlId, setUrlId } from '../lib/url'
+import { getUrlId, setUrlId, makeUrl } from '../lib/url'
 import { loadDoc, saveDoc, saveDocBeacon } from '../lib/dinky-api'
 import { useBeforeUnload } from './useBeforeUnload'
 import { randomId } from '../lib/utils'
@@ -182,5 +182,34 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
       .catch((err) => console.error('Error saving doc', err))
   }, [doc, userId, stringDoc, setDoc])
 
-  return { onFork, onTitleChange, isLocked, isOwner, hasUnsavedChanges, onPostLoginSave }
+  // Share handler - saves the current space and copies the link
+  const onShare = useCallback(() => {
+    if (!doc.id) return
+
+    const url = makeUrl(doc.id, doc.title)
+
+    // If owner and logged in, save first then copy
+    if (isOwner && userId) {
+      const updatedDoc = { ...doc, userId }
+      saveDoc(updatedDoc, userId)
+        .then(() => {
+          originalDoc.current = JSON.stringify(updatedDoc)
+          return navigator.clipboard.writeText(url)
+        })
+        .then(() => {
+          alert('Link copied!')
+        })
+        .catch((err) => console.error('Error sharing', err))
+    } else {
+      // Just copy the link for non-owners or non-logged-in users
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          alert('Link copied!')
+        })
+        .catch((err) => console.error('Error copying link', err))
+    }
+  }, [doc, userId, isOwner])
+
+  return { onFork, onTitleChange, isLocked, isOwner, hasUnsavedChanges, onPostLoginSave, onShare }
 }

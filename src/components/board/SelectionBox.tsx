@@ -6,7 +6,7 @@ type SelectionBoxProps = {
 }
 
 function MouseSelectionBox({ onChange }: SelectionBoxProps) {
-  const [box, setBox] = useState<{ x1: number, y1: number, x2: number, y2: number }>({ x1: 0, y1: 0, x2: 0, y2: 0 })
+  const [box, setBox] = useState<{ x1: number, y1: number, x2: number, y2: number }>({ x1: -10000, y1: -10000, x2: -10000, y2: -10000 })
   const ref = useRef<HTMLDivElement>(null)
 
   const onDragStart = useCallback((x: number, y: number) => {

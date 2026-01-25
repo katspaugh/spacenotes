@@ -283,6 +283,12 @@ textarea:focus {
   color: var(--text-primary);
 }
 
+@media (max-width: 480px) {
+  .LogoText {
+    display: none;
+  }
+}
+
 .TitleInput {
   background: var(--bg-muted);
   border: none;
@@ -302,6 +308,51 @@ textarea:focus {
 
 .TitleInput::placeholder {
   color: var(--text-tertiary);
+}
+
+.TitleInput:read-only {
+  cursor: default;
+}
+
+.LockIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.LockIndicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ShareFloat {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--bg-surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  box-shadow: 0 2px 12px var(--shadow-color), 0 1px 3px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ShareFloat:hover {
+  background: var(--bg-muted);
+}
+
+.ShareFloat svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-primary);
 }
 
 .HeaderActions {

@@ -8,7 +8,7 @@ import { useDocument } from '../context/DocumentContext.js'
 
 export function Editor() {
   const state = useDocument()
-  const { doc, cursors, clientId, onCursorMove, onNodeCreate, onNodeDelete, onNodeUpdate, onConnect, onDisconnect, onBackgroundColorChange, onTitleChange, onFork, isLocked, onShareSession, isOwner, onPostLoginSave } = state
+  const { doc, cursors, clientId, onCursorMove, onNodeCreate, onNodeDelete, onNodeUpdate, onConnect, onDisconnect, onBackgroundColorChange, onTitleChange, onFork, isLocked, onShareSession, isOwner, onPostLoginSave, onShare } = state
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -58,7 +58,9 @@ export function Editor() {
         onTitleChange={onTitleChange}
         onToggleSidebar={toggleSidebar}
         onShareSession={onShareSession}
+        onShare={onShare}
         isOwner={isOwner}
+        isLocked={isLocked}
       />
 
       <Sidebar

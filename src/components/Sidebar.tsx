@@ -131,12 +131,13 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
             <a href={makeUrl(Math.random().toString(36).slice(2))}>
               <button className="Button_primary">+ New space</button>
             </a>
-            {isOwner && (
+            {isLocked ? (
+              <ForkButton onFork={onFork} />
+            ) : isOwner && (
               <button className="Button_secondary" onClick={onShareSession}>
-                Share
+                Invite
               </button>
             )}
-            {isLocked && <ForkButton onFork={onFork} />}
           </div>
         )}
 
