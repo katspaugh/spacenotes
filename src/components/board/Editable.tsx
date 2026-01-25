@@ -24,6 +24,17 @@ const getPreviewHtml = (preview: LinkPreview) => {
   ].join(''))
 }
 
+const DATA_IMAGE_REGEX = /^data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+$/
+
+const isDataImageUrl = (content: string): boolean => {
+  const trimmed = content.trim()
+  return DATA_IMAGE_REGEX.test(trimmed)
+}
+
+const getDataImageHtml = (dataUrl: string): string => {
+  return `<img src="${dataUrl.trim()}" />`
+}
+
 export const Editable = ({ id, content, width, height, onChange, onHeightChange }: EditableProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const isManualHeight = height && height === Math.round(height)
@@ -110,6 +121,12 @@ export const Editable = ({ id, content, width, height, onChange, onHeightChange 
 
   useEffect(() => {
     if (content) {
+      // Check for data:image URL first
+      if (isDataImageUrl(content)) {
+        onChange(getDataImageHtml(content))
+        return
+      }
+      // Check for regular URL to fetch preview
       const url = parseUrl(content)
       if (url) {
         fetchPreview(url).then((preview) => {

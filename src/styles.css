@@ -196,18 +196,24 @@ textarea:focus {
 .Board {
   position: relative;
   z-index: 1;
+}
+
+.BoardCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
   background-color: rgba(255, 255, 255, 0.6);
   background-image: radial-gradient(circle, var(--grid-dot-color) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 @media (prefers-color-scheme: dark) {
-  .Board {
+  .BoardCanvas {
     background-color: rgba(0, 0, 0, 0.3);
   }
 }
 
-.Board > svg {
+.BoardCanvas > svg {
   position: absolute;
   z-index: 2;
   left: 0;
@@ -217,8 +223,8 @@ textarea:focus {
   pointer-events: none;
 }
 
-.Board_locked,
-.Board_locked > svg path {
+.Board_locked .BoardCanvas,
+.Board_locked .BoardCanvas > svg path {
   pointer-events: none;
 }
 
@@ -1036,6 +1042,66 @@ button.Sidebar_toggle {
   width: 32px;
   height: 32px;
   border-radius: 8px;
+}
+
+/* ========================================
+   Zoom Controls
+======================================== */
+
+.ZoomControls {
+  position: fixed;
+  bottom: 12px;
+  right: 60px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 12px var(--shadow-color), 0 1px 3px var(--shadow-color);
+  padding: 4px;
+}
+
+.ZoomBtn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.ZoomBtn:hover {
+  background: var(--bg-muted);
+}
+
+.ZoomBtn svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-primary);
+}
+
+.ZoomLevel {
+  min-width: 48px;
+  height: 32px;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background 0.15s ease;
+}
+
+.ZoomLevel:hover {
+  background: var(--bg-muted);
 }
 
 /* ========================================

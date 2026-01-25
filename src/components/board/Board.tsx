@@ -37,11 +37,16 @@ type BoardProps = {
 const WIDTH = 5000
 const HEIGHT = 5000
 
+const ZOOM_STEP = 0.1
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 2
+
 export function Board(props: BoardProps) {
   const tempFrom = useRef<string | null>(null)
   const [tempEdge, setTempEdge] = useState<CanvasEdge | null>(null)
   const [selectedNodes, setSelectedNodes] = useState<string[]>([])
-  const mousePosition = useMousePosition()
+  const [zoom, setZoom] = useState(1)
+  const mousePosition = useMousePosition(zoom)
 
   const updateSelection = useCallback(
     (ids: string[]) => {
@@ -209,7 +214,29 @@ export function Board(props: BoardProps) {
     [tryDeleteSelectedNodes],
   )
 
-  const sx = useMemo(() => ({ width: `${WIDTH}px`, height: `${HEIGHT}px` }), [])
+  const sx = useMemo(() => ({
+    width: `${WIDTH * zoom}px`,
+    height: `${HEIGHT * zoom}px`,
+  }), [zoom])
+
+  const canvasSx = useMemo(() => ({
+    width: `${WIDTH}px`,
+    height: `${HEIGHT}px`,
+    transform: `scale(${zoom})`,
+    transformOrigin: '0 0',
+  }), [zoom])
+
+  const onZoomIn = useCallback(() => {
+    setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))
+  }, [])
+
+  const onZoomOut = useCallback(() => {
+    setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))
+  }, [])
+
+  const onZoomReset = useCallback(() => {
+    setZoom(1)
+  }, [])
 
   const onTitleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     props.onTitleChange?.(e.target.value)
@@ -226,6 +253,28 @@ export function Board(props: BoardProps) {
       onClick={onBoardClick}
       onDoubleClick={onBoardDblClick}
     >
+      {/* Canvas content with zoom transform */}
+      <div className="BoardCanvas" style={canvasSx}>
+        {props.nodes?.map(renderNode)}
+
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
+          {props.edges?.map(renderEdge)}
+          {tempEdge && renderEdge(tempEdge, undefined, undefined, mousePosition)}
+        </svg>
+
+        {Object.entries(props.cursors).map(([id, c]) => (
+          id === props.clientId ? null : (
+            <div
+              key={id}
+              className="RemoteCursor"
+              style={{ left: c.x, top: c.y, '--cursor-color': c.color } as CSSProperties }
+            />
+          )
+        ))}
+
+        <SelectionBox onChange={onSelectionChange} />
+      </div>
+
       {/* Floating Header */}
       <div className="FloatingHeader" onClick={stopPropagationClick}>
         <div className="LogoFloat">
@@ -272,26 +321,25 @@ export function Board(props: BoardProps) {
         </div>
       </div>
 
-      {props.nodes?.map(renderNode)}
-
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
-        {props.edges?.map(renderEdge)}
-        {tempEdge && renderEdge(tempEdge, undefined, undefined, mousePosition)}
-      </svg>
-
-      {Object.entries(props.cursors).map(([id, c]) => (
-        id === props.clientId ? null : (
-          <div
-            key={id}
-            className="RemoteCursor"
-            style={{ left: c.x, top: c.y, '--cursor-color': c.color } as CSSProperties }
-          />
-        )
-      ))}
-
-      <SelectionBox onChange={onSelectionChange} />
-
       <ColorPicker color={props.backgroundColor} onColorChange={onBackgroundColorChange} />
+
+      {/* Zoom Controls */}
+      <div className="ZoomControls" onClick={stopPropagationClick} onDoubleClick={stopPropagationClick}>
+        <button className="ZoomBtn" onClick={onZoomOut} title="Zoom out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button className="ZoomLevel" onClick={onZoomReset} title="Reset zoom">
+          {Math.round(zoom * 100)}%
+        </button>
+        <button className="ZoomBtn" onClick={onZoomIn} title="Zoom in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+      </div>
     </div>
   )
 }
