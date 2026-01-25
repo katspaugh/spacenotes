@@ -2,7 +2,7 @@
 
 A real-time collaborative canvas for visual thinking. Create, connect, and organize your ideas with draggable cards.
 
-<img width="300" src="https://github.com/katspaugh/dinky.dog/assets/381895/daf42772-3058-47b9-9956-7e5bf0291afa">
+<img width="1152" height="1097" alt="Image" src="https://github.com/user-attachments/assets/bf3bebfd-2358-4808-8b8c-f13dae7e129b" />
 
 ## User Guide
 
@@ -125,5 +125,3 @@ The function accepts a JSON string with the space data and populates the current
 Authentication with email/password is enabled via the Supabase dashboard. The
 app wraps all React components in `SessionContextProvider` and uses the Supabase
 client from `src/lib/supabase.ts`.
-
-<img alt="Screenshot" src="https://github.com/katspaugh/dinky.dog/assets/381895/e75910b9-82a9-4157-ac32-3733e93a65bb">
