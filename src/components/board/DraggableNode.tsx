@@ -17,6 +17,8 @@ type DraggableNodeProps = CanvasNode & {
 }
 
 const BG_THRESHOLD = 110e3
+const MIN_WIDTH = 50
+const MIN_HEIGHT = 50
 
 const stopPropagation = (e) => e.stopPropagation()
 
@@ -85,8 +87,14 @@ export function DraggableNode(props: DraggableNodeProps) {
     (dx: number, dy: number) => {
       const oldSize = size.current
       const newSize = {
-        width: Math.round((oldSize.width || INITIAL_WIDTH) + dx),
-        height: Math.round((oldSize.height || INITIAL_HEIGHT) + dy),
+        width: Math.max(
+          Math.round((oldSize.width || INITIAL_WIDTH) + dx),
+          MIN_WIDTH
+        ),
+        height: Math.max(
+          Math.round((oldSize.height || INITIAL_HEIGHT) + dy),
+          MIN_HEIGHT
+        ),
       }
       props.onNodeUpdate(props.id, newSize)
       return newSize
