@@ -4,7 +4,7 @@ import type { CanvasNode } from '../types/canvas'
 import { randomId, randomPastelColor } from '../lib/utils.js'
 
 export function useDocState() {
-  const [_doc, setDoc] = useState<DinkyDataV2>({ nodes: [], edges: [], id: '', lastSequence: 0, version: 2 })
+  const [_doc, setDoc] = useState<DinkyDataV2>({ nodes: [], edges: [], id: '', lastSequence: 0, version: 2, kind: 'space' })
   const [lastColor, setLastColor] = useState<string>()
 
   const onNodeCreate = useCallback((props: Partial<CanvasNode>) => {
