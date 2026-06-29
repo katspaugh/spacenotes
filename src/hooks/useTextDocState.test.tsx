@@ -77,6 +77,50 @@ describe('useTextDocState', () => {
     )
   })
 
+  it('does not revert newer edits that arrive while a save is in flight', async () => {
+    let resolveSave!: (value: { status: number; key: string }) => void
+    vi.mocked(saveDoc).mockImplementationOnce(
+      () =>
+        new Promise<{ status: number; key: string }>((resolve) => {
+          resolveSave = resolve
+        }),
+    )
+
+    const { result } = renderHook(() => useTextDocState('doc-1'))
+    await waitFor(() => expect(result.current.doc?.title).toBe('RFC'))
+
+    // Trigger an edit so the autosave debounce starts
+    act(() => {
+      result.current.onTitleChange('First')
+    })
+
+    // Advance timers so the autosave fires — saveDoc is now in flight but unresolved
+    vi.mocked(saveDoc).mockClear() // reset call count accumulated from prior tests
+    await act(async () => {
+      vi.advanceTimersByTime(800)
+    })
+    expect(saveDoc).toHaveBeenCalledTimes(1)
+
+    // Make a newer edit while the save is still in flight
+    const newerContent = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'newer' }] }],
+    }
+    act(() => {
+      result.current.onContentChange(newerContent as Parameters<typeof result.current.onContentChange>[0])
+    })
+    expect(result.current.doc?.content).toEqual(newerContent)
+
+    // Now let the in-flight save resolve
+    await act(async () => {
+      resolveSave({ status: 200, key: 'doc-1' })
+      await Promise.resolve()
+    })
+
+    // The newer edit must NOT have been reverted by the stale snapshot in .then()
+    expect(result.current.doc?.content).toEqual(newerContent)
+  })
+
   it('saves with beacon before unload for owners with changes', async () => {
     const { result } = renderHook(() => useTextDocState('doc-1'))
 

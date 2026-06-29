@@ -64,7 +64,6 @@ export function useTextDocState(id: string) {
       saveDoc(docToSave, userId)
         .then(() => {
           originalDoc.current = JSON.stringify(docToSave)
-          setDoc(docToSave)
           setUrlId(docToSave.id, docToSave.title, 'doc')
         })
         .catch((err) => console.error('Error saving text document', err))
