@@ -41,4 +41,26 @@ describe('DocEditor', () => {
     expect(screen.getByLabelText('Document title')).toBeDisabled()
     expect(screen.getByTestId('doc-editor-content')).toHaveAttribute('contenteditable', 'false')
   })
+
+  it('syncs the title input when the doc.title prop changes', () => {
+    const doc = { ...createTextDoc('doc-1'), title: 'First' }
+    const { rerender } = render(
+      <DocEditor
+        doc={doc}
+        editable={true}
+        onTitleChange={vi.fn()}
+        onContentChange={vi.fn()}
+      />,
+    )
+    expect(screen.getByLabelText('Document title')).toHaveValue('First')
+    rerender(
+      <DocEditor
+        doc={{ ...doc, title: 'Second' }}
+        editable={true}
+        onTitleChange={vi.fn()}
+        onContentChange={vi.fn()}
+      />,
+    )
+    expect(screen.getByLabelText('Document title')).toHaveValue('Second')
+  })
 })

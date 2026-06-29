@@ -40,6 +40,10 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange }: Doc
     }
   }, [editor, doc.content])
 
+  useEffect(() => {
+    setTitle(doc.title ?? '')
+  }, [doc.title])
+
   return (
     <main className="DocEditor">
       <input
