@@ -17,7 +17,7 @@ function addPrefix(id: string, title?: string) {
   return prefix ? `${prefix}_${id}` : id
 }
 
-export function setUrlId(id: string, title?: string) {
+export function setUrlId(id: string, title?: string, _kind?: string) {
   const url = new URL(window.location.href)
   url.searchParams.set('q', encodeURIComponent(addPrefix(id, title)))
   window.history.replaceState({}, '', url.toString())

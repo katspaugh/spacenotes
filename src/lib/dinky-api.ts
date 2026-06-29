@@ -1,4 +1,5 @@
 import type { CanvasProps } from '../types/canvas.js'
+import type { TextDocData } from '../types/doc.js'
 import { stripHtml } from './sanitize-html.js'
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase.js'
 
@@ -13,6 +14,8 @@ export type DinkyDataV2 = CanvasProps & {
   version: 2
   userId?: string
 }
+
+export type AnyDocData = DinkyDataV2 | TextDocData
 
 type FluentQuery = {
   select: (columns: string, options?: { count?: 'exact' }) => FluentQuery
@@ -48,7 +51,7 @@ function getRowKind(row: Pick<DocumentRow, 'kind'>): DocumentKind {
   return row.kind === 'doc' ? 'doc' : 'space'
 }
 
-export async function loadDoc(id: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<DinkyDataV2> {
+export async function loadDoc(id: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<AnyDocData> {
   const { data: row, error } = await client
     .from('documents')
     .select('data, user_id, kind')
@@ -60,12 +63,13 @@ export async function loadDoc(id: string, client: DocumentsClient = supabase as 
   }
 
   const typedRow = row as DocumentRow
+  const kind = getRowKind(typedRow)
   const data = JSON.parse(typedRow.data)
 
-  return { ...data, userId: typedRow.user_id, kind: getRowKind(typedRow) }
+  return { ...data, userId: typedRow.user_id, kind }
 }
 
-export async function saveDoc(data: DinkyDataV2, userId: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<{ status: number; key: string }> {
+export async function saveDoc(data: AnyDocData, userId: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<{ status: number; key: string }> {
   const kind = data.kind ?? 'space'
   const encData = JSON.stringify({ ...data, kind })
   const { error } = await client
@@ -78,7 +82,7 @@ export async function saveDoc(data: DinkyDataV2, userId: string, client: Documen
   return { status: 200, key: data.id }
 }
 
-export function saveDocBeacon(data: DinkyDataV2, accessToken: string, userId: string): void {
+export function saveDocBeacon(data: AnyDocData, accessToken: string, userId: string): void {
   const url = `${SUPABASE_URL}/rest/v1/documents?on_conflict=id`
   const kind = data.kind ?? 'space'
   const encData = JSON.stringify({ ...data, kind })
