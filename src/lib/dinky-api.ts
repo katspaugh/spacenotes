@@ -1,9 +1,13 @@
 import type { CanvasProps } from '../types/canvas.js'
+import type { TextDocData } from '../types/doc.js'
 import { stripHtml } from './sanitize-html.js'
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase.js'
 
+export type DocumentKind = 'space' | 'doc'
+
 export type DinkyDataV2 = CanvasProps & {
   id: string
+  kind: 'space'
   lastSequence: number
   title?: string
   backgroundColor?: string
@@ -11,26 +15,66 @@ export type DinkyDataV2 = CanvasProps & {
   userId?: string
 }
 
-export async function loadDoc(id: string): Promise<DinkyDataV2> {
-  const { data: row, error } = await supabase
+export type AnyDocData = DinkyDataV2 | TextDocData
+
+type FluentQuery = {
+  select: (columns: string, options?: { count?: 'exact' }) => FluentQuery
+  eq: (...args: unknown[]) => FluentQuery
+  order: (...args: unknown[]) => FluentQuery
+  range: (from: number, to: number) => Promise<{ data?: unknown; count?: number | null; error?: { message?: string; code?: string } | null }>
+  maybeSingle: () => Promise<{ data?: unknown; error?: { message?: string; code?: string } | null }>
+  upsert: (payload: unknown) => Promise<{ error: { message?: string; code?: string } | null }>
+  delete?: () => FluentQuery
+}
+
+export type DocumentsClient = {
+  from: (table: 'documents') => FluentQuery
+}
+
+type DocumentRow = {
+  id?: string
+  data: string
+  user_id?: string
+  kind?: DocumentKind | null
+  updated_at?: string
+}
+
+export type SpaceMeta = {
+  id: string
+  title?: string
+  backgroundColor?: string
+  updated_at?: string
+  kind: DocumentKind
+}
+
+function getRowKind(row: Pick<DocumentRow, 'kind'>): DocumentKind {
+  return row.kind === 'doc' ? 'doc' : 'space'
+}
+
+export async function loadDoc(id: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<AnyDocData> {
+  const { data: row, error } = await client
     .from('documents')
-    .select('data, user_id')
+    .select('data, user_id, kind')
     .eq('id', id)
     .maybeSingle()
 
   if (error || !row) {
     throw new Error(error?.message || 'Document not found')
   }
-  const data = JSON.parse(row.data)
 
-  return { ...data, userId: row.user_id }
+  const typedRow = row as DocumentRow
+  const kind = getRowKind(typedRow)
+  const data = JSON.parse(typedRow.data)
+
+  return { ...data, userId: typedRow.user_id, kind }
 }
 
-export async function saveDoc(data: DinkyDataV2, userId: string): Promise<{ status: number; key: string }> {
-  const encData = JSON.stringify(data)
-  const { error } = await supabase
+export async function saveDoc(data: AnyDocData, userId: string, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<{ status: number; key: string }> {
+  const kind = data.kind ?? 'space'
+  const encData = JSON.stringify({ ...data, kind })
+  const { error } = await client
     .from('documents')
-    .upsert({ id: data.id, data: encData, user_id: userId })
+    .upsert({ id: data.id, data: encData, user_id: userId, kind })
 
   if (error) {
     throw error
@@ -38,10 +82,11 @@ export async function saveDoc(data: DinkyDataV2, userId: string): Promise<{ stat
   return { status: 200, key: data.id }
 }
 
-export function saveDocBeacon(data: DinkyDataV2, accessToken: string, userId: string): void {
+export function saveDocBeacon(data: AnyDocData, accessToken: string, userId: string): void {
   const url = `${SUPABASE_URL}/rest/v1/documents?on_conflict=id`
-  const encData = JSON.stringify(data)
-  const body = JSON.stringify({ id: data.id, data: encData, user_id: userId })
+  const kind = data.kind ?? 'space'
+  const encData = JSON.stringify({ ...data, kind })
+  const body = JSON.stringify({ id: data.id, data: encData, user_id: userId, kind })
   void fetch(url, {
     method: 'POST',
     headers: {
@@ -54,9 +99,8 @@ export function saveDocBeacon(data: DinkyDataV2, accessToken: string, userId: st
     keepalive: true,
   })
 }
-export type SpaceMeta = { id: string; title?: string; backgroundColor?: string; updated_at?: string }
 
-export async function listDocsPage(userId: string, page = 1, perPage = 12): Promise<{ spaces: SpaceMeta[]; total: number }> {
+export async function listDocsPage(userId: string, page = 1, perPage = 12, client: DocumentsClient = supabase as unknown as DocumentsClient): Promise<{ spaces: SpaceMeta[]; total: number }> {
   if (!userId) {
     return { spaces: [], total: 0 }
   }
@@ -64,24 +108,22 @@ export async function listDocsPage(userId: string, page = 1, perPage = 12): Prom
   const from = (page - 1) * perPage
   const to = from + perPage - 1
 
-  // Try with updated_at first, fallback to without if column doesn't exist
   const makeQueryWithTimestamp = () =>
-    supabase
+    client
       .from('documents')
-      .select('id, data, updated_at', { count: 'exact' })
+      .select('id, data, updated_at, kind', { count: 'exact' })
       .eq('user_id', userId)
 
   const makeQueryWithoutTimestamp = () =>
-    supabase
+    client
       .from('documents')
-      .select('id, data', { count: 'exact' })
+      .select('id, data, kind', { count: 'exact' })
       .eq('user_id', userId)
 
   let { data, count, error } = await makeQueryWithTimestamp()
     .order('updated_at', { ascending: false })
     .range(from, to)
 
-  // Fallback if updated_at column doesn't exist
   if (error?.code === '42703') {
     const fallback = await makeQueryWithoutTimestamp().range(from, to)
     data = fallback.data as typeof data
@@ -92,17 +134,19 @@ export async function listDocsPage(userId: string, page = 1, perPage = 12): Prom
   if (error || !data) {
     throw error || new Error('Unable to load documents')
   }
-  const spaces = data.map((row: { id: string; data: string; updated_at?: string }) => {
+
+  const spaces = (data as DocumentRow[]).map((row: DocumentRow) => {
     try {
       const parsed = JSON.parse(row.data)
       return {
-        id: row.id,
-        title: parsed.title || stripHtml(parsed.nodes[0]?.content || ''),
+        id: row.id || '',
+        title: parsed.title || stripHtml(parsed.nodes?.[0]?.content || ''),
         backgroundColor: parsed.backgroundColor,
         updated_at: row.updated_at,
+        kind: getRowKind(row),
       } as SpaceMeta
     } catch {
-      return { id: row.id, updated_at: row.updated_at } as SpaceMeta
+      return { id: row.id || '', updated_at: row.updated_at, kind: getRowKind(row) } as SpaceMeta
     }
   })
   return { spaces, total: count || spaces.length }

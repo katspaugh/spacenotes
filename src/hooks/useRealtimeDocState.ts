@@ -6,6 +6,7 @@ import { debounce, randomId, randomBrightColor, randomPastelColor } from '../lib
 import { supabase } from '../lib/supabase.js'
 import { loadDoc } from '../lib/dinky-api.js'
 import { useSession } from '@supabase/auth-helpers-react'
+import { isSpaceDoc } from '../lib/doc-kind.js'
 
 export function useRealtimeDocState() {
   const state = useDocState()
@@ -47,7 +48,9 @@ export function useRealtimeDocState() {
         () => {
           loadDoc(doc.id)
             .then((newDoc) => {
-              setDoc(newDoc)
+              if (isSpaceDoc(newDoc)) {
+                setDoc(newDoc)
+              }
             })
             .catch((err) => console.error('Error refreshing doc', err))
         },

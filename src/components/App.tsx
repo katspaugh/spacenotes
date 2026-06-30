@@ -6,15 +6,13 @@ import { randomId } from '../lib/utils.js'
 export function App() {
   const [id, setId] = useState(() => getUrlId())
 
-  // Auto-create new space when landing without doc ID
   useEffect(() => {
     if (!id) {
       const newId = randomId()
-      setUrlId(newId)
+      setUrlId(newId, undefined, 'space')
       setId(newId)
     }
   }, [id])
 
-  // Always show EditorPage - it handles everything now
   return <EditorPage />
 }

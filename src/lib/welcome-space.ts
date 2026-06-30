@@ -6,6 +6,7 @@ import type { DinkyDataV2 } from './dinky-api'
  */
 export const welcomeSpace: Omit<DinkyDataV2, 'id' | 'userId'> = {
   version: 2,
+  kind: 'space',
   lastSequence: 0,
   title: 'Welcome to SpaceNotes',
   backgroundColor: '#f8fafc',

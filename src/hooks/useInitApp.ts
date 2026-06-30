@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { getUrlId, setUrlId, makeUrl } from '../lib/url'
-import { loadDoc, saveDoc, saveDocBeacon } from '../lib/dinky-api'
-import { useBeforeUnload } from './useBeforeUnload'
-import { randomId } from '../lib/utils'
-import { type useDocState } from './useDocState'
+import { getUrlId, setUrlId, makeUrl } from '../lib/url.js'
+import { loadDoc, saveDoc, saveDocBeacon } from '../lib/dinky-api.js'
+import { useBeforeUnload } from './useBeforeUnload.js'
+import { randomId } from '../lib/utils.js'
+import { type useDocState } from './useDocState.js'
 import { useSession } from '@supabase/auth-helpers-react'
+import { isSpaceDoc } from '../lib/doc-kind.js'
 
 const TITLE = 'SpaceNotes'
 const PENDING_FORK_KEY = 'spacenotes-fork'
@@ -50,10 +51,13 @@ export function useInitApp(state: ReturnType<typeof useDocState> & { sessionToke
         if (prevDoc.id !== id) {
           loadDoc(id)
             .then((newDoc) => {
+              if (!isSpaceDoc(newDoc)) {
+                throw new Error('Loaded document is not a space')
+              }
               console.log('Loaded doc', id, newDoc)
               originalDoc.current = JSON.stringify(newDoc)
               setDoc(newDoc)
-              setUrlId(newDoc.id, newDoc.title)
+              setUrlId(newDoc.id, newDoc.title, 'space')
             })
             .catch((err) => {
               console.error('Error loading doc', err)
