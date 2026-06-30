@@ -137,13 +137,8 @@
 }
 
 /* ========================================
-   DocEditor body — hide the title input
-   (title is shown in DocHeader above)
+   DocEditor body
 ======================================== */
-
-.DocPage .DocEditor_title {
-  display: none;
-}
 
 .DocPage .DocEditor {
   margin: 0;

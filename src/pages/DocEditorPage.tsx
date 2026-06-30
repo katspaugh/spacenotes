@@ -99,6 +99,7 @@ export function DocEditorPage() {
             editable={!state.isLocked}
             onTitleChange={state.onTitleChange}
             onContentChange={state.onContentChange}
+            renderTitle={false}
           />
         </article>
       </div>
