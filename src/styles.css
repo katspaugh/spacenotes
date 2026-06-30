@@ -1,4 +1,13 @@
 :root {
+  /* RFC Paper design tokens */
+  --ink: #211b12;
+  --accent: #5b63d6;
+  --page: #efeadd;
+  --paper: #fbf8f0;
+  --meta: #8a8170;
+  --hl: #fbe7a8;
+  --resolved: #9db58f;
+
   /* Typography */
   --font-family: 'Inter', 'Mulish', Avenir, Helvetica, Arial, sans-serif;
   --font-family-cards: 'Nunito Sans', Avenir, Helvetica, Arial, sans-serif;
@@ -55,6 +64,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* RFC Paper dark-mode overrides */
+    --ink: #e8e2d2;
+    --page: #1a1712;
+    --paper: #211b12;
+
     /* Dark mode colors */
     --bg-primary: #0F172A;
     --bg-surface: #1E293B;
