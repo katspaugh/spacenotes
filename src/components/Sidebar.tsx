@@ -145,12 +145,8 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
 
         {userId && (
           <div className="MenuActions">
-            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'space')} aria-label="New space">
-              <button className="Button_primary">New space</button>
-            </a>
-            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'doc')} aria-label="New document">
-              <button className="Button_secondary">New document</button>
-            </a>
+            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'space')} className="Button_primary">New space</a>
+            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'doc')} className="Button_secondary">New document</a>
             {isLocked ? (
               <ForkButton onFork={onFork} />
             ) : isOwner && (

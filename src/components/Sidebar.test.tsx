@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { useSession } from '@supabase/auth-helpers-react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { listDocsPage } from '../lib/dinky-api.js'
@@ -42,8 +42,9 @@ describe('Sidebar document kinds', () => {
       />,
     )
 
-    expect(screen.getByRole('link', { name: 'New space' })).toHaveAttribute('href', expect.not.stringContaining('kind=doc'))
+    expect(await screen.findByRole('link', { name: 'New space' })).toHaveAttribute('href', expect.not.stringContaining('kind=doc'))
     expect(screen.getByRole('link', { name: 'New document' })).toHaveAttribute('href', expect.stringContaining('kind=doc'))
+
   })
 
   it('renders kind-specific labels in the document list', async () => {
@@ -58,7 +59,7 @@ describe('Sidebar document kinds', () => {
       />,
     )
 
-    await waitFor(() => expect(screen.getByText('Canvas')).toBeInTheDocument())
+    await screen.findByText('Canvas')
 
     expect(screen.getByLabelText('Space')).toBeInTheDocument()
     expect(screen.getByLabelText('Document')).toBeInTheDocument()
