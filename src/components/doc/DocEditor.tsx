@@ -8,9 +8,10 @@ type DocEditorProps = {
   editable: boolean
   onTitleChange: (title: string) => void
   onContentChange: (content: TipTapJSON) => void
+  renderTitle?: boolean
 }
 
-export function DocEditor({ doc, editable, onTitleChange, onContentChange }: DocEditorProps) {
+export function DocEditor({ doc, editable, onTitleChange, onContentChange, renderTitle = true }: DocEditorProps) {
   const [title, setTitle] = useState(doc.title ?? '')
 
   const editor = useEditor({
@@ -46,17 +47,19 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange }: Doc
 
   return (
     <main className="DocEditor">
-      <input
-        aria-label="Document title"
-        className="DocEditor_title"
-        disabled={!editable}
-        placeholder="Untitled document"
-        value={title}
-        onChange={(event) => {
-          setTitle(event.target.value)
-          onTitleChange(event.target.value)
-        }}
-      />
+      {renderTitle && (
+        <input
+          aria-label="Document title"
+          className="DocEditor_title"
+          disabled={!editable}
+          placeholder="Untitled document"
+          value={title}
+          onChange={(event) => {
+            setTitle(event.target.value)
+            onTitleChange(event.target.value)
+          }}
+        />
+      )}
       <EditorContent
         className="DocEditor_content"
         editor={editor}

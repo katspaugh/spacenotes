@@ -1,0 +1,154 @@
+/* ========================================
+   DocPage — full-screen dotted cream canvas
+======================================== */
+
+.DocPage {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background-color: var(--page);
+  background-image: radial-gradient(#2b251c20 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px 80px;
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .DocPage {
+    background-image: radial-gradient(rgba(232, 226, 210, 0.12) 1.4px, transparent 1.4px);
+  }
+}
+
+/* ========================================
+   DocPaper — the centered paper card
+======================================== */
+
+.DocPaper {
+  width: 100%;
+  max-width: 680px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  box-shadow: 4px 4px 0 var(--ink);
+  box-sizing: border-box;
+  padding: 40px 44px;
+}
+
+/* ========================================
+   DocHeader — breadcrumb + title + byline
+======================================== */
+
+.DocHeader {
+  margin-bottom: 0;
+}
+
+.DocHeader_breadcrumb {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #6f6557;
+  letter-spacing: 0.3px;
+  margin: 0 0 20px;
+}
+
+.DocHeader_breadcrumb strong {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.DocHeader_titleWrapper {
+  margin: 0;
+}
+
+.DocHeader_titleInput {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 33px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+  padding: 0;
+  margin-top: 14px;
+  border-radius: 0;
+}
+
+.DocHeader_titleInput::placeholder {
+  color: var(--meta);
+}
+
+.DocHeader_titleInput:focus {
+  outline: none;
+  border: none;
+}
+
+.DocHeader_titleInput:disabled {
+  cursor: default;
+  background: transparent;
+}
+
+.DocHeader_byline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.DocHeader_avatar {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  background: var(--accent);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-weight: 800;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.DocHeader_author {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.DocHeader_date {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--meta);
+}
+
+.DocHeader_hr {
+  height: 1.5px;
+  background: var(--ink);
+  opacity: 0.18;
+  margin: 22px 0;
+  border: none;
+}
+
+/* ========================================
+   DocEditor body
+======================================== */
+
+.DocPage .DocEditor {
+  margin: 0;
+  padding: 0;
+}
+
+/* DocPage menu button — top-right overlay */
+.DocPage_menuBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+}
