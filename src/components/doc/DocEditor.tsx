@@ -15,7 +15,12 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange, rende
   const [title, setTitle] = useState(doc.title ?? '')
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        link: { openOnClick: false },
+        underline: {},
+      }),
+    ],
     content: doc.content,
     editable,
     immediatelyRender: false,
