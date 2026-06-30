@@ -17,23 +17,21 @@ type SidebarProps = {
 
 const ITEMS_PER_PAGE = 100
 
-// Simple color generator based on string
 function getSpaceColor(title: string): string {
   const colors = [
-    '#3B82F6', // Blue
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
-    '#EF4444', // Red
-    '#F97316', // Orange
-    '#EAB308', // Yellow
-    '#22C55E', // Green
-    '#14B8A6', // Teal
+    '#3B82F6',
+    '#8B5CF6',
+    '#EC4899',
+    '#EF4444',
+    '#F97316',
+    '#EAB308',
+    '#22C55E',
+    '#14B8A6',
   ]
   const hash = title?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0
   return colors[hash % colors.length]
 }
 
-// Format relative time
 function formatTimeAgo(dateStr?: string): string {
   if (!dateStr) return ''
   const date = new Date(dateStr)
@@ -48,6 +46,29 @@ function formatTimeAgo(dateStr?: string): string {
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
   return date.toLocaleDateString()
+}
+
+function KindIcon({ doc }: { doc: SpaceMeta }) {
+  if (doc.kind === 'doc') {
+    return (
+      <div className="SpaceItemIcon SpaceItemIcon_doc" aria-label="Document">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6" />
+          <path d="M8 13h8" />
+          <path d="M8 17h8" />
+        </svg>
+      </div>
+    )
+  }
+
+  const color = getSpaceColor(doc.title || doc.id)
+  const initial = (doc.title || 'U')[0].toUpperCase()
+  return (
+    <div className="SpaceItemIcon" aria-label="Space" style={{ backgroundColor: color }}>
+      {initial}
+    </div>
+  )
 }
 
 export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isOwner, onSignIn }: SidebarProps) {
@@ -87,12 +108,10 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
     e.stopPropagation()
   }, [])
 
-  // Filter docs by search query (UI only - no backend filtering)
   const filteredDocs = searchQuery
     ? docs.filter(doc => doc.title?.toLowerCase().includes(searchQuery.toLowerCase()))
     : docs
 
-  // Get user initials for avatar
   const userInitials = userEmail
     ? userEmail.split('@')[0].slice(0, 2).toUpperCase()
     : '?'
@@ -104,7 +123,6 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
         style={{ transform: `translateX(${isOpen ? 0 : '100%'})` }}
         onClick={stopPropagation}
       >
-        {/* Header */}
         <div className="MenuHeader">
           <div className="MenuHeaderLeft">
             <div className="LogoIcon">
@@ -125,11 +143,13 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
           </button>
         </div>
 
-        {/* Action Buttons */}
         {userId && (
           <div className="MenuActions">
-            <a href={makeUrl(Math.random().toString(36).slice(2))}>
-              <button className="Button_primary">+ New space</button>
+            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'space')} aria-label="New space">
+              <button className="Button_primary">New space</button>
+            </a>
+            <a href={makeUrl(Math.random().toString(36).slice(2), undefined, 'doc')} aria-label="New document">
+              <button className="Button_secondary">New document</button>
             </a>
             {isLocked ? (
               <ForkButton onFork={onFork} />
@@ -141,7 +161,6 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
           </div>
         )}
 
-        {/* Search Bar */}
         {userId && (
           <div className="SearchBar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -150,14 +169,13 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
             </svg>
             <input
               type="text"
-              placeholder="Search spaces..."
+              placeholder="Search spaces and documents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         )}
 
-        {/* Spaces Section */}
         {userId && (
           <div className="SpacesSection">
             <div className="SpacesSectionHeader">
@@ -167,18 +185,14 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
             <div className="SpacesList">
               {filteredDocs.map((doc) => {
                 const isActive = doc.id === currentId
-                const color = getSpaceColor(doc.title || doc.id)
-                const initial = (doc.title || 'U')[0].toUpperCase()
 
                 return (
                   <a
                     key={doc.id}
-                    href={makeUrl(doc.id, doc.title)}
+                    href={makeUrl(doc.id, doc.title, doc.kind)}
                     className={`SpaceItem${isActive ? ' SpaceItem_active' : ''}`}
                   >
-                    <div className="SpaceItemIcon" style={{ backgroundColor: color }}>
-                      {initial}
-                    </div>
+                    <KindIcon doc={doc} />
                     <div className="SpaceItemContent">
                       <div className="SpaceItemTitle">{doc.title || 'Untitled'}</div>
                       <div className="SpaceItemMeta">{formatTimeAgo(doc.updated_at)}</div>
@@ -202,7 +216,6 @@ export function Sidebar({ isOpen, onClose, isLocked, onFork, onShareSession, isO
           </div>
         )}
 
-        {/* Footer */}
         <div className="MenuFooter">
           {userId ? (
             <>
