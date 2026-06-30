@@ -336,3 +336,122 @@
   right: 16px;
   z-index: 50;
 }
+
+/* ========================================
+   SelectionToolbar — floating BubbleMenu bar
+   Appears on non-empty text selection near the selection.
+   Matches the selection popover in the design HTML.
+======================================== */
+
+.SelectionToolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--paper, #fbf8f0);
+  border: 1.5px solid var(--ink, #211b12);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--ink, #211b12);
+  padding: 4px 6px;
+}
+
+.SelectionToolbar_btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--ink, #211b12);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.SelectionToolbar_btn:hover {
+  background: color-mix(in srgb, var(--ink, #211b12) 8%, transparent);
+}
+
+.SelectionToolbar_btn.is-active {
+  background: color-mix(in srgb, var(--accent, #5b63d6) 15%, transparent);
+  color: var(--accent, #5b63d6);
+}
+
+.SelectionToolbar_btn--italic {
+  font-style: italic;
+  font-weight: 700;
+}
+
+.SelectionToolbar_btn--underline {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.SelectionToolbar_btn--link {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  width: auto;
+  padding: 0 6px;
+}
+
+.SelectionToolbar_divider {
+  display: inline-block;
+  width: 1.5px;
+  height: 18px;
+  background: var(--ink, #211b12);
+  opacity: 0.2;
+  margin: 0 3px;
+  flex-shrink: 0;
+}
+
+.SelectionToolbar_comment {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--accent, #5b63d6);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: opacity 0.1s;
+}
+
+.SelectionToolbar_comment:hover {
+  opacity: 0.88;
+}
+
+@media (prefers-color-scheme: dark) {
+  .SelectionToolbar {
+    background: #1a1512;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .SelectionToolbar_btn {
+    color: #e8e2d2;
+  }
+
+  .SelectionToolbar_btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .SelectionToolbar_btn.is-active {
+    background: color-mix(in srgb, var(--accent, #5b63d6) 25%, transparent);
+    color: var(--accent, #5b63d6);
+  }
+
+  .SelectionToolbar_divider {
+    background: rgba(255, 255, 255, 0.25);
+    opacity: 1;
+  }
+}
