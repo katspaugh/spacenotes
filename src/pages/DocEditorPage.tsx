@@ -32,6 +32,10 @@ export function DocEditorPage() {
     state.onPostLoginSave()
   }, [state])
 
+  if (state.error) {
+    return <div className="DocEditorPage_error">{state.error}</div>
+  }
+
   if (state.isLoading || !state.doc) {
     return <div className="DocEditorPage_loading">Loading...</div>
   }

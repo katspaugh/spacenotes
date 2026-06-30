@@ -13,22 +13,28 @@ export function useTextDocState(id: string) {
   const userId = session?.user?.id || ''
   const [doc, setDoc] = useState<TextDocData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const originalDoc = useRef('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const userIdRef = useRef(userId)
 
   const stringDoc = useMemo(() => JSON.stringify(doc), [doc])
   const isOwner = !doc?.userId || doc.userId === userId
   const isLocked = !isOwner || !userId
 
+  useEffect(() => { userIdRef.current = userId })
+
   useEffect(() => {
     let cancelled = false
     setIsLoading(true)
+    setError(null)
 
     loadDoc(id)
       .then((loaded) => {
         if (cancelled) return
         if (!isTextDoc(loaded)) {
-          throw new Error('Loaded document is not a text document')
+          setError('This document could not be opened.')
+          return
         }
         setDoc(loaded)
         originalDoc.current = JSON.stringify(loaded)
@@ -37,13 +43,14 @@ export function useTextDocState(id: string) {
       .catch((err) => {
         if (cancelled) return
         if (err instanceof Error && err.message === 'Document not found') {
-          const draft = createTextDoc(id, userId || undefined)
+          const draft = createTextDoc(id, userIdRef.current || undefined)
           setDoc(draft)
           originalDoc.current = JSON.stringify(draft)
           setUrlId(draft.id, draft.title, 'doc')
           return
         }
         console.error('Error loading text document', err)
+        setError('This document could not be opened.')
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -52,7 +59,7 @@ export function useTextDocState(id: string) {
     return () => {
       cancelled = true
     }
-  }, [id, userId])
+  }, [id])
 
   useEffect(() => {
     if (!doc || !isOwner || !userId) return
@@ -116,6 +123,7 @@ export function useTextDocState(id: string) {
     isOwner,
     isLocked,
     isLoading,
+    error,
     onTitleChange,
     onContentChange,
     onPostLoginSave,

@@ -121,6 +121,18 @@ describe('useTextDocState', () => {
     expect(result.current.doc?.content).toEqual(newerContent)
   })
 
+  it('surfaces an error and keeps doc null when a non-text doc is loaded', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(loadDoc).mockResolvedValueOnce({ id: 'doc-1', kind: 'space', version: 2, lastSequence: 0, nodes: [], edges: [] } as any)
+
+    const { result } = renderHook(() => useTextDocState('doc-1'))
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    expect(result.current.error).not.toBeNull()
+    expect(result.current.doc).toBeNull()
+  })
+
   it('saves with beacon before unload for owners with changes', async () => {
     const { result } = renderHook(() => useTextDocState('doc-1'))
 
