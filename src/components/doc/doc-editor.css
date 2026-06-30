@@ -291,7 +291,6 @@
 .DocEditor_content .ProseMirror blockquote p {
   margin-bottom: 0;
   font-style: italic;
-  color: var(--meta);
 }
 
 /* Links */
