@@ -430,6 +430,76 @@
   opacity: 0.88;
 }
 
+/* ========================================
+   Comment highlight decorations
+   Inline yellow highlight over [from, to].
+   --hl: #fbe7a8 light / #e8ce7a border
+   --resolved: #9db58f sage (resolved threads)
+   --accent: #5b63d6 indigo (badge background)
+======================================== */
+
+.cmt-highlight {
+  background: var(--hl, #fbe7a8);
+  box-shadow: 0 0 0 2px var(--hl, #fbe7a8);
+  border-bottom: 2px solid var(--accent, #5b63d6);
+  padding: 0 1px;
+  border-radius: 1px;
+}
+
+.cmt-highlight--resolved {
+  background: color-mix(in srgb, var(--resolved, #9db58f) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--resolved, #9db58f) 30%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--resolved, #9db58f) 60%, transparent);
+}
+
+/* ========================================
+   Comment badge widget — numbered superscript
+   Sits at `to` via side:1 widget decoration.
+======================================== */
+
+.cmt-badge {
+  display: inline-block;
+  transform: translateY(-2px);
+  margin-left: 3px;
+  background: var(--accent, #5b63d6);
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+  vertical-align: top;
+  cursor: default;
+  user-select: none;
+}
+
+.cmt-badge--resolved {
+  background: var(--meta, #8a8170);
+}
+
+@media (prefers-color-scheme: dark) {
+  .cmt-highlight {
+    background: color-mix(in srgb, #fbe7a8 25%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, #fbe7a8 25%, transparent);
+    border-bottom-color: var(--accent, #5b63d6);
+  }
+
+  .cmt-highlight--resolved {
+    background: color-mix(in srgb, var(--resolved, #9db58f) 20%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--resolved, #9db58f) 20%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--resolved, #9db58f) 50%, transparent);
+  }
+
+  .cmt-badge {
+    background: var(--accent, #5b63d6);
+  }
+
+  .cmt-badge--resolved {
+    background: #6a6358;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .SelectionToolbar {
     background: #1a1512;
