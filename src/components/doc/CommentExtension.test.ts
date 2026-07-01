@@ -13,7 +13,8 @@
 import { getSchema } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import type { Node as PMNode } from '@tiptap/pm/model'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { Decoration } from '@tiptap/pm/view'
+import { beforeAll, describe, expect, it } from 'vitest'
 import type { CommentThread } from '../../types/comment.js'
 import { buildDecorations, highlightClass, badgeClass } from './CommentExtension.js'
 
@@ -34,10 +35,6 @@ beforeAll(() => {
       },
     ],
   })
-})
-
-afterAll(() => {
-  // nothing to tear down
 })
 
 // ---------------------------------------------------------------------------
@@ -159,7 +156,7 @@ describe('buildDecorations', () => {
     const set = buildDecorations(doc, [thread])
     const decos = set.find()
     // The inline decoration has from < to; the widget has from === to
-    const inline = decos.find((d) => d.from === 5 && d.to === 10)
+    const inline = decos.find((d: Decoration) => d.from === 5 && d.to === 10)
     expect(inline).toBeDefined()
   })
 
@@ -167,7 +164,7 @@ describe('buildDecorations', () => {
     const thread = makeThread({ from: 5, to: 10 })
     const set = buildDecorations(doc, [thread])
     const decos = set.find()
-    const widget = decos.find((d) => d.from === 10 && d.to === 10)
+    const widget = decos.find((d: Decoration) => d.from === 10 && d.to === 10)
     expect(widget).toBeDefined()
   })
 
@@ -175,7 +172,7 @@ describe('buildDecorations', () => {
     const thread = makeThread({ from: 5, to: 10, resolved: false })
     const set = buildDecorations(doc, [thread])
     const decos = set.find()
-    const inline = decos.find((d) => d.from < d.to)
+    const inline = decos.find((d: Decoration) => d.from < d.to)
     // access internal attrs — cast to any since InlineType.attrs is @internal in PM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cls: string = (inline as any)?.type?.attrs?.class ?? ''
@@ -186,7 +183,7 @@ describe('buildDecorations', () => {
     const thread = makeThread({ from: 5, to: 10, resolved: true })
     const set = buildDecorations(doc, [thread])
     const decos = set.find()
-    const inline = decos.find((d) => d.from < d.to)
+    const inline = decos.find((d: Decoration) => d.from < d.to)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cls: string = (inline as any)?.type?.attrs?.class ?? ''
     expect(cls).toBe('cmt-highlight cmt-highlight--resolved')
@@ -219,16 +216,31 @@ describe('buildDecorations', () => {
     expect(set.find()).toHaveLength(2)
   })
 
-  it('badge numbering is 1-based over rendered threads — two threads yield 4 decorations', () => {
+  it('badge numbering is 1-based over rendered threads (skipped threads do not consume numbers)', () => {
     const threads = [
       makeNullAnchorThread(),                                      // skipped
-      makeThread({ from: 1, to: 4, threadId: 'th-1' }),           // "The"
+      makeThread({ from: 1, to: 4, threadId: 'th-1' }),           // "The"  → badge "1"
       makeOutdatedThread(),                                        // skipped
-      makeThread({ from: 5, to: 10, threadId: 'th-2' }),          // "quick"
+      makeThread({ from: 5, to: 10, threadId: 'th-2' }),          // "quick" → badge "2"
     ]
     const set = buildDecorations(doc, threads)
     // Two valid threads → 4 decorations (2 inline + 2 widget)
     expect(set.find()).toHaveLength(4)
+
+    // Render each widget's DOM (the factory ignores its args) and read the
+    // badge number, keyed by the widget's position (to of each anchor).
+    const widgets = set.find().filter((d: Decoration) => d.from === d.to)
+    const badgeAt = (pos: number): string => {
+      const w = widgets.find((d: Decoration) => d.from === pos)
+      // WidgetType.toDOM is the factory function we passed to Decoration.widget
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const el = (w as any).type.toDOM as HTMLElement | (() => HTMLElement)
+      const node = typeof el === 'function' ? el() : el
+      return node.textContent ?? ''
+    }
+
+    expect(badgeAt(4)).toBe('1')   // th-1 (renders first)
+    expect(badgeAt(10)).toBe('2')  // th-2 (renders second; skipped threads don't count)
   })
 
   it('two rendered threads produce 2 widget decorations (at their respective to positions)', () => {
@@ -238,11 +250,11 @@ describe('buildDecorations', () => {
     ]
     const set = buildDecorations(doc, threads)
     const decos = set.find()
-    const widgets = decos.filter((d) => d.from === d.to)
+    const widgets = decos.filter((d: Decoration) => d.from === d.to)
     expect(widgets).toHaveLength(2)
     // Each widget sits at `to` of its respective anchor
-    expect(widgets.some((w) => w.from === 4)).toBe(true)
-    expect(widgets.some((w) => w.from === 10)).toBe(true)
+    expect(widgets.some((w: Decoration) => w.from === 4)).toBe(true)
+    expect(widgets.some((w: Decoration) => w.from === 10)).toBe(true)
   })
 
   it('out-of-range anchors (entirely beyond doc) are skipped without throwing', () => {

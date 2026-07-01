@@ -498,9 +498,7 @@
   .cmt-badge--resolved {
     background: #6a6358;
   }
-}
 
-@media (prefers-color-scheme: dark) {
   .SelectionToolbar {
     background: #1a1512;
     border-color: rgba(255, 255, 255, 0.25);
