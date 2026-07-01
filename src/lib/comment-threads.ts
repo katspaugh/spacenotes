@@ -77,18 +77,18 @@ export function reanchorThreads(threads: CommentThread[], docText: string): Comm
     const { root } = thread
     const anchor = root.anchor
 
-    // No anchor or empty quote → no change needed
+    // No anchor or empty quote → no change needed; anchored (not outdated)
     if (anchor === null) {
-      return { ...thread }
+      return { ...thread, outdated: false }
     }
 
     if (anchor.quote === '') {
-      return { ...thread, root: { ...root } }
+      return { ...thread, root: { ...root }, outdated: false }
     }
 
     // Exact match at the stored position
     if (docText.slice(anchor.from, anchor.to) === anchor.quote) {
-      return { ...thread, root: { ...root } }
+      return { ...thread, root: { ...root }, outdated: false }
     }
 
     // Relocated — search for the quote elsewhere
