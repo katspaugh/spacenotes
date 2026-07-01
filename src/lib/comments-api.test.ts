@@ -208,6 +208,11 @@ describe('comments-api', () => {
     await expect(createComment(input, client)).rejects.toThrow('nope')
   })
 
+  it('updateComment throws on error', async () => {
+    const client = makeClient({ error: { message: 'forbidden' } })
+    await expect(updateComment('c-1', { resolved: true }, client)).rejects.toThrow('forbidden')
+  })
+
   it('deleteComment throws on error', async () => {
     const client = makeClient({ error: { message: 'denied' } })
     await expect(deleteComment('c-1', client)).rejects.toThrow('denied')
