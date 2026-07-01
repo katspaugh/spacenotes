@@ -7,7 +7,7 @@ import {
   deleteComment,
 } from '../lib/comments-api.js'
 import { groupIntoThreads } from '../lib/comment-threads.js'
-import type { CommentAnchor, CommentThread } from '../types/comment.js'
+import type { Comment, CommentAnchor, CommentThread } from '../types/comment.js'
 
 export function useComments(
   docId: string,
@@ -30,7 +30,7 @@ export function useComments(
   const authorName = email ? email.split('@')[0] : 'anonymous'
 
   const [threads, setThreads] = useState<CommentThread[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Keep refs up-to-date so mutation callbacks don't need these in their dep arrays
@@ -83,15 +83,21 @@ export function useComments(
     if (!uid) throw new Error('Must be signed in to add a comment')
 
     const threadId = crypto.randomUUID()
-    const created = await createComment({
-      docId,
-      threadId,
-      parentId: null,
-      authorId: uid,
-      authorName: authorNameRef.current,
-      body,
-      anchor,
-    })
+    let created: Comment
+    try {
+      created = await createComment({
+        docId,
+        threadId,
+        parentId: null,
+        authorId: uid,
+        authorName: authorNameRef.current,
+        body,
+        anchor,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add comment')
+      throw err
+    }
 
     setThreads((prev) =>
       groupIntoThreads([...prev.flatMap((t) => [t.root, ...t.replies]), created]),
@@ -105,15 +111,21 @@ export function useComments(
     const thread = threadsRef.current.find((t) => t.root.threadId === threadId)
     if (!thread) return
 
-    const created = await createComment({
-      docId,
-      threadId,
-      parentId: thread.root.id,
-      authorId: uid,
-      authorName: authorNameRef.current,
-      body,
-      anchor: null,
-    })
+    let created: Comment
+    try {
+      created = await createComment({
+        docId,
+        threadId,
+        parentId: thread.root.id,
+        authorId: uid,
+        authorName: authorNameRef.current,
+        body,
+        anchor: null,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reply')
+      throw err
+    }
 
     setThreads((prev) =>
       groupIntoThreads([...prev.flatMap((t) => [t.root, ...t.replies]), created]),

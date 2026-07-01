@@ -47,7 +47,20 @@ describe('useComments', () => {
   })
 
   it('loads comments on mount, groups into threads, clears loading', async () => {
+    let resolveList: (value: Comment[]) => void = () => {}
+    vi.mocked(listComments).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveList = resolve
+      }),
+    )
+
     const { result } = renderHook(() => useComments('doc-1'))
+
+    // loading is true until the initial fetch resolves
+    expect(result.current.loading).toBe(true)
+    await act(async () => {
+      resolveList([baseComment])
+    })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
 
@@ -134,6 +147,44 @@ describe('useComments', () => {
         await result.current.addComment({ from: 0, to: 1, quote: 'H' }, 'test')
       }),
     ).rejects.toThrow('Must be signed in')
+  })
+
+  it('sets error state when addComment fails', async () => {
+    vi.mocked(createComment).mockRejectedValueOnce(new Error('insert failed'))
+
+    const { result } = renderHook(() => useComments('doc-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let thrown: unknown
+    await act(async () => {
+      try {
+        await result.current.addComment({ from: 0, to: 1, quote: 'H' }, 'test')
+      } catch (err) {
+        thrown = err
+      }
+    })
+
+    expect((thrown as Error).message).toBe('insert failed')
+    expect(result.current.error).toBe('insert failed')
+  })
+
+  it('sets error state when reply fails', async () => {
+    vi.mocked(createComment).mockRejectedValueOnce(new Error('reply failed'))
+
+    const { result } = renderHook(() => useComments('doc-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let thrown: unknown
+    await act(async () => {
+      try {
+        await result.current.reply('comment-1', 'a reply')
+      } catch (err) {
+        thrown = err
+      }
+    })
+
+    expect((thrown as Error).message).toBe('reply failed')
+    expect(result.current.error).toBe('reply failed')
   })
 
   it('replies to a thread optimistically', async () => {
