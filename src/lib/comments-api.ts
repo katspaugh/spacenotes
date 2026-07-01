@@ -1,32 +1,7 @@
 import { supabase } from './supabase.js'
 
-// NOTE(Task 5): these types move to src/types/comment.d.ts and are reconciled
-// with the thread view-model there. Defined inline here to avoid a forward
-// dependency on a not-yet-created module.
-export type CommentAnchor = { from: number; to: number; quote: string }
-
-export type Comment = {
-  id: string
-  docId: string
-  threadId: string
-  parentId: string | null
-  authorId: string
-  authorName: string
-  body: string
-  anchor: CommentAnchor | null
-  resolved: boolean
-  createdAt: string
-}
-
-export type NewComment = {
-  docId: string
-  threadId: string
-  parentId?: string | null
-  authorId: string
-  authorName: string
-  body: string
-  anchor?: CommentAnchor | null
-}
+import type { Comment, CommentAnchor, NewComment } from '../types/comment.js'
+export type { Comment, CommentAnchor, NewComment } from '../types/comment.js'
 
 type QueryResult = {
   data?: unknown
