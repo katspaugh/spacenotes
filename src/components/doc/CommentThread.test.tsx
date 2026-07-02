@@ -111,6 +111,37 @@ describe('CommentThreadCard', () => {
     expect(screen.getByText(/Good call!/)).toBeInTheDocument()
   })
 
+  it('escapes a reply author name containing HTML (no injection)', () => {
+    const thread = makeThread({
+      replies: [
+        {
+          id: 'r1',
+          docId: 'doc-1',
+          threadId: 'thread-1',
+          parentId: 'c1',
+          authorId: 'user-2',
+          authorName: '<img src=x onerror="alert(1)">',
+          body: 'reply body',
+          anchor: null,
+          resolved: false,
+          createdAt: NOW_ISO,
+        },
+      ],
+    })
+    const { container } = render(
+      <CommentThreadCard
+        thread={thread}
+        canReply={true}
+        canResolve={false}
+        onReply={vi.fn()}
+        onResolve={vi.fn()}
+      />,
+    )
+    // The name is rendered as escaped JSX text, not parsed into an <img> element
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.getByText(/onerror/)).toBeInTheDocument()
+  })
+
   it('Reply input calls onReply with typed text on Enter', () => {
     const onReply = vi.fn()
     render(

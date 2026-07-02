@@ -31,10 +31,26 @@ vi.mock('../components/LoginModal.js', () => ({
     isOpen ? <div>Login Modal</div> : null,
 }))
 
-// Stub DocEditor to avoid TipTap JSDOM complexity in page-level tests
+// Stub DocEditor to avoid TipTap JSDOM complexity in page-level tests.
+// Exposes a button that fires onCreateComment with a fixed anchor so the
+// page's "+ Comment" → composer flow is testable without the BubbleMenu.
 vi.mock('../components/doc/DocEditor.js', () => ({
-  DocEditor: ({ doc }: { doc: { title?: string } }) => (
-    <div data-testid="doc-editor-stub">{doc.title}</div>
+  DocEditor: ({
+    doc,
+    onCreateComment,
+  }: {
+    doc: { title?: string }
+    onCreateComment?: (anchor: { from: number; to: number; quote: string }) => void
+  }) => (
+    <div data-testid="doc-editor-stub">
+      {doc.title}
+      <button
+        type="button"
+        onClick={() => onCreateComment?.({ from: 1, to: 5, quote: 'hell' })}
+      >
+        trigger-comment
+      </button>
+    </div>
   ),
 }))
 
@@ -269,6 +285,79 @@ describe('DocEditorPage comments', () => {
     fireEvent.click(resolveBtn)
 
     expect(mockResolve).toHaveBeenCalledWith('thread-1', true)
+  })
+
+  it('clicking "+ Comment" while signed in opens the inline composer (no window.prompt)', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    // Composer is not shown until "+ Comment" fires
+    expect(screen.queryByLabelText('Comment text')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'trigger-comment' }))
+
+    expect(screen.getByLabelText('Comment text')).toBeInTheDocument()
+  })
+
+  it('posting from the composer calls addComment with the anchor and body', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'trigger-comment' }))
+    const input = screen.getByLabelText('Comment text')
+    fireEvent.change(input, { target: { value: 'A new comment' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Comment' }))
+
+    expect(mockAddComment).toHaveBeenCalledWith(
+      { from: 1, to: 5, quote: 'hell' },
+      'A new comment',
+    )
+    // Composer closes after posting
+    expect(screen.queryByLabelText('Comment text')).toBeNull()
+  })
+
+  it('cancelling the composer discards it without calling addComment', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'trigger-comment' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(screen.queryByLabelText('Comment text')).toBeNull()
+    expect(mockAddComment).not.toHaveBeenCalled()
+  })
+
+  it('clicking "+ Comment" while anonymous opens the LoginModal instead of a composer', async () => {
+    mockAnonymousSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'trigger-comment' }))
+
+    expect(screen.getByText('Login Modal')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Comment text')).toBeNull()
+  })
+
+  it('does not render the comments panel for an anonymous viewer with no comments', async () => {
+    mockAnonymousSession()
+    mockCommentsReturn({ threads: [], openThreads: [], resolvedThreads: [] })
+
+    render(<DocEditorPage />)
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    // No panel → no "Sign in to comment" affordance and the paper stays centered
+    expect(screen.queryByRole('button', { name: /sign in to comment/i })).toBeNull()
   })
 
   it('renders the resolved tab when there are resolved threads', async () => {

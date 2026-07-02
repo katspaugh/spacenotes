@@ -85,7 +85,7 @@ export function DocEditor({
       const decorated = target.closest('[data-thread-id]') as HTMLElement | null
       if (decorated) {
         const threadId = decorated.dataset['threadId']
-        if (threadId) onFocusThread!(threadId)
+        if (threadId) onFocusThread?.(threadId)
       }
     }
     dom.addEventListener('click', handleClick)

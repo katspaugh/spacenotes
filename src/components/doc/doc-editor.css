@@ -503,6 +503,90 @@
    CommentsPanel — right-hand comment rail
 ======================================== */
 
+/* Comments column — holds the inline composer + the panel */
+.DocComments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+}
+
+/* Inline comment composer (replaces the crude window.prompt) */
+.CommentComposer {
+  background: var(--paper, #fbf8f0);
+  border: 1.5px solid var(--accent, #5b63d6);
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 var(--accent, #5b63d6);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.CommentComposer_quote {
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--meta, #8a8170);
+  border-left: 2px solid var(--accent, #5b63d6);
+  padding-left: 8px;
+}
+
+.CommentComposer_input {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink, #211b12);
+  background: #fff;
+  border: 1.5px solid var(--ink, #211b12);
+  border-radius: 4px;
+  padding: 8px 10px;
+  min-height: 62px;
+  resize: vertical;
+  outline: none;
+}
+
+.CommentComposer_actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.CommentComposer_cancel {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--meta, #8a8170);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px 8px;
+}
+
+.CommentComposer_post {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent, #5b63d6);
+  border: none;
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.CommentComposer_post:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (prefers-color-scheme: dark) {
+  .CommentComposer_input {
+    background: #1a1512;
+    color: #e8e2d2;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
 .CommentsPanel {
   display: flex;
   flex-direction: column;
