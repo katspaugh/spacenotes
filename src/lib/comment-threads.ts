@@ -71,6 +71,13 @@ export function groupIntoThreads(comments: Comment[]): CommentThread[] {
  * - If not found → outdated=true (stale anchor kept, no highlight for callers).
  *
  * Returns new thread objects — inputs are never mutated.
+ *
+ * NOTE (coordinate mismatch): this helper operates on PLAIN-TEXT offsets, but
+ * anchors created by the editor are ProseMirror document positions (see
+ * DocEditor's "+ Comment" handler). The two coordinate systems differ, so this
+ * function is intentionally NOT wired into the live comment flow yet — outdated
+ * re-anchoring is a deferred follow-up that must first reconcile PM positions
+ * with plain-text offsets. It remains unit-tested as a standalone pure helper.
  */
 export function reanchorThreads(threads: CommentThread[], docText: string): CommentThread[] {
   return threads.map((thread) => {
