@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import type { TextDocData, TipTapJSON } from '../../types/doc.js'
+import type { CommentAnchor, CommentThread } from '../../types/comment.js'
 import { SelectionToolbar } from './SelectionToolbar.js'
+import { CommentDecorations, setCommentThreads } from './CommentExtension.js'
 
 type DocEditorProps = {
   doc: TextDocData
@@ -10,11 +12,23 @@ type DocEditorProps = {
   onTitleChange: (title: string) => void
   onContentChange: (content: TipTapJSON) => void
   renderTitle?: boolean
-  /** Called when the user clicks "+ Comment" in the selection toolbar. Wired in Task 8. */
-  onComment?: () => void
+  threads?: CommentThread[]
+  canComment?: boolean
+  onCreateComment?: (anchor: CommentAnchor) => void
+  onFocusThread?: (threadId: string) => void
 }
 
-export function DocEditor({ doc, editable, onTitleChange, onContentChange, renderTitle = true, onComment = () => {} }: DocEditorProps) {
+export function DocEditor({
+  doc,
+  editable,
+  onTitleChange,
+  onContentChange,
+  renderTitle = true,
+  threads = [],
+  canComment = false,
+  onCreateComment = () => {},
+  onFocusThread,
+}: DocEditorProps) {
   const [title, setTitle] = useState(doc.title ?? '')
 
   const editor = useEditor({
@@ -23,6 +37,7 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange, rende
         link: { openOnClick: false },
         underline: {},
       }),
+      CommentDecorations,
     ],
     content: doc.content,
     editable,
@@ -53,6 +68,38 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange, rende
     setTitle(doc.title ?? '')
   }, [doc.title])
 
+  // NOTE: outdated re-anchoring deferred — anchors are PM positions; reanchorThreads is plain-text (coordinate reconciliation is a follow-up)
+  useEffect(() => {
+    if (!editor) return
+    setCommentThreads(editor, threads)
+  }, [editor, threads])
+
+  // Listen for clicks on comment decoration elements (.cmt-highlight, .cmt-badge)
+  // and forward the thread-id to the onFocusThread callback so clicking a highlight
+  // scrolls/focuses the corresponding panel thread.
+  useEffect(() => {
+    if (!editor || !onFocusThread) return
+    const dom = editor.view.dom
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement
+      const decorated = target.closest('[data-thread-id]') as HTMLElement | null
+      if (decorated) {
+        const threadId = decorated.dataset['threadId']
+        if (threadId) onFocusThread?.(threadId)
+      }
+    }
+    dom.addEventListener('click', handleClick)
+    return () => dom.removeEventListener('click', handleClick)
+  }, [editor, onFocusThread])
+
+  const handleComment = useCallback(() => {
+    if (!editor) return
+    const { from, to, empty } = editor.state.selection
+    if (empty) return
+    const quote = editor.state.doc.textBetween(from, to, ' ')
+    onCreateComment({ from, to, quote })
+  }, [editor, onCreateComment])
+
   return (
     <main className="DocEditor">
       {renderTitle && (
@@ -72,9 +119,8 @@ export function DocEditor({ doc, editable, onTitleChange, onContentChange, rende
         <SelectionToolbar
           editor={editor}
           canFormat={editable}
-          // TODO(Task 8): canComment should become true for any signed-in viewer, not just the owner
-          canComment={editable}
-          onComment={onComment}
+          canComment={canComment}
+          onComment={handleComment}
         />
       )}
       <EditorContent

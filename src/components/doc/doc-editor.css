@@ -329,6 +329,27 @@
   }
 }
 
+/* ========================================
+   DocPage_layout — flex row holding the paper + comments rail.
+   On wide screens the panel sits to the right; on narrow it
+   drops below (flex-wrap: wrap kicks in below ~1100px).
+======================================== */
+
+.DocPage_layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1101px) {
+  .DocPage_layout {
+    flex-wrap: nowrap;
+  }
+}
+
 /* DocPage menu button — top-right overlay */
 .DocPage_menuBtn {
   position: fixed;
@@ -430,7 +451,494 @@
   opacity: 0.88;
 }
 
+/* ========================================
+   Comment highlight decorations
+   Inline yellow highlight over [from, to].
+   --hl: #fbe7a8 light / #e8ce7a border
+   --resolved: #9db58f sage (resolved threads)
+   --accent: #5b63d6 indigo (badge background)
+======================================== */
+
+.cmt-highlight {
+  background: var(--hl, #fbe7a8);
+  box-shadow: 0 0 0 2px var(--hl, #fbe7a8);
+  border-bottom: 2px solid var(--accent, #5b63d6);
+  padding: 0 1px;
+  border-radius: 1px;
+}
+
+.cmt-highlight--resolved {
+  background: color-mix(in srgb, var(--resolved, #9db58f) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--resolved, #9db58f) 30%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--resolved, #9db58f) 60%, transparent);
+}
+
+/* ========================================
+   Comment badge widget — numbered superscript
+   Sits at `to` via side:1 widget decoration.
+======================================== */
+
+.cmt-badge {
+  display: inline-block;
+  transform: translateY(-2px);
+  margin-left: 3px;
+  background: var(--accent, #5b63d6);
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+  vertical-align: top;
+  cursor: default;
+  user-select: none;
+}
+
+.cmt-badge--resolved {
+  background: var(--meta, #8a8170);
+}
+
+/* ========================================
+   CommentsPanel — right-hand comment rail
+======================================== */
+
+/* Comments column — holds the inline composer + the panel */
+.DocComments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+}
+
+/* Inline comment composer (replaces the crude window.prompt) */
+.CommentComposer {
+  background: var(--paper, #fbf8f0);
+  border: 1.5px solid var(--accent, #5b63d6);
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 var(--accent, #5b63d6);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.CommentComposer_quote {
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--meta, #8a8170);
+  border-left: 2px solid var(--accent, #5b63d6);
+  padding-left: 8px;
+}
+
+.CommentComposer_input {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink, #211b12);
+  background: #fff;
+  border: 1.5px solid var(--ink, #211b12);
+  border-radius: 4px;
+  padding: 8px 10px;
+  min-height: 62px;
+  resize: vertical;
+  outline: none;
+}
+
+.CommentComposer_actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.CommentComposer_cancel {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--meta, #8a8170);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px 8px;
+}
+
+.CommentComposer_post {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent, #5b63d6);
+  border: none;
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.CommentComposer_post:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (prefers-color-scheme: dark) {
+  .CommentComposer_input {
+    background: #1a1512;
+    color: #e8e2d2;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.CommentsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 300px;
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+.CommentsPanel_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.CommentsPanel_title {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ink, #211b12);
+}
+
+.CommentsPanel_tabs {
+  display: flex;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+}
+
+.CommentsPanel_tab {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--meta, #8a8170);
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+.CommentsPanel_tab.is-active {
+  background: var(--ink, #211b12);
+  color: #efeadd;
+  padding: 2px 8px;
+}
+
+.CommentsPanel_threads {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.CommentsPanel_empty {
+  font-size: 13px;
+  color: var(--meta, #8a8170);
+  font-style: italic;
+  margin: 0;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.CommentsPanel_signin {
+  padding: 10px 0;
+}
+
+.CommentsPanel_signin button {
+  background: var(--accent, #5b63d6);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.1s;
+}
+
+.CommentsPanel_signin button:hover {
+  opacity: 0.88;
+}
+
+/* ========================================
+   CommentThread — single thread card
+======================================== */
+
+.CommentThread {
+  background: #fbf8f0;
+  border: 1.5px solid var(--ink, #211b12);
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 var(--ink, #211b12);
+  overflow: hidden;
+}
+
+.CommentThread.is-active {
+  border-color: var(--accent, #5b63d6);
+  box-shadow: 3px 3px 0 var(--accent, #5b63d6);
+}
+
+.CommentThread.is-resolved {
+  background: #f2eee3;
+  border-color: #cfc6b2;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+.CommentThread_header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 13px 0;
+}
+
+.CommentThread_avatar {
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--ink, #211b12);
+  border-radius: 999px;
+  font-weight: 800;
+  color: var(--ink, #211b12);
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.CommentThread.is-resolved .CommentThread_avatar {
+  border-color: #cfc6b2;
+}
+
+.CommentThread_author {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink, #211b12);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.CommentThread.is-resolved .CommentThread_author {
+  color: #6f6557;
+}
+
+.CommentThread_badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #7a9a6f;
+  background: #9db58f33;
+  border: 1px solid #9db58f;
+  border-radius: 3px;
+  padding: 1px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.CommentThread_time {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--meta, #8a8170);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.CommentThread_outdated {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #b9543c;
+  margin: 6px 13px 0;
+  padding: 0;
+}
+
+.CommentThread_body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2b2419;
+  margin: 8px 13px 12px;
+  cursor: default;
+}
+
+.CommentThread.is-resolved .CommentThread_body {
+  text-decoration: line-through;
+  text-decoration-color: #c9c0ad;
+  color: #7a7264;
+  font-size: 13.5px;
+  margin-bottom: 11px;
+}
+
+/* Flat replies */
+.CommentThread_reply {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 13px;
+  border-top: 1.5px solid #efe7d6;
+}
+
+.CommentThread_replyText {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #2b2419;
+}
+
+/* Reply input */
+.CommentThread_replyInput {
+  border-top: 1.5px solid var(--ink, #211b12);
+  background: #ece5d4;
+  padding: 0;
+}
+
+.CommentThread_replyInput input {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--ink, #211b12);
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.CommentThread_replyInput input::placeholder {
+  color: var(--meta, #8a8170);
+}
+
+/* Resolve button row */
+.CommentThread_resolveRow {
+  padding: 0 13px 10px;
+}
+
+.CommentThread_resolveBtn {
+  background: transparent;
+  border: 1px solid var(--meta, #8a8170);
+  border-radius: 3px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--meta, #8a8170);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.CommentThread_resolveBtn:hover {
+  border-color: var(--ink, #211b12);
+  color: var(--ink, #211b12);
+}
+
+/* ========================================
+   Dark mode — CommentsPanel + CommentThread
+======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .CommentsPanel_title {
+    color: #e8e2d2;
+  }
+
+  .CommentsPanel_tab.is-active {
+    background: #e8e2d2;
+    color: #1a1512;
+  }
+
+  .CommentsPanel_signin button {
+    background: var(--accent, #5b63d6);
+  }
+
+  .CommentThread {
+    background: #1e1a14;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  .CommentThread.is-active {
+    border-color: var(--accent, #5b63d6);
+    box-shadow: 3px 3px 0 var(--accent, #5b63d6);
+  }
+
+  .CommentThread.is-resolved {
+    background: #1a1710;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .CommentThread_avatar {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .CommentThread_author {
+    color: #e8e2d2;
+  }
+
+  .CommentThread.is-resolved .CommentThread_author {
+    color: #9a9080;
+  }
+
+  .CommentThread_body {
+    color: #d4cfc5;
+  }
+
+  .CommentThread.is-resolved .CommentThread_body {
+    color: #7a7264;
+  }
+
+  .CommentThread_reply {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .CommentThread_replyText {
+    color: #d4cfc5;
+  }
+
+  .CommentThread_replyInput {
+    background: #151209;
+    border-top-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .CommentThread_replyInput input {
+    color: #e8e2d2;
+  }
+
+  .CommentThread_resolveBtn {
+    color: #9a9080;
+    border-color: #9a9080;
+  }
+
+  .CommentThread_resolveBtn:hover {
+    color: #e8e2d2;
+    border-color: #e8e2d2;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .cmt-highlight {
+    background: color-mix(in srgb, #fbe7a8 25%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, #fbe7a8 25%, transparent);
+    border-bottom-color: var(--accent, #5b63d6);
+  }
+
+  .cmt-highlight--resolved {
+    background: color-mix(in srgb, var(--resolved, #9db58f) 20%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--resolved, #9db58f) 20%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--resolved, #9db58f) 50%, transparent);
+  }
+
+  .cmt-badge {
+    background: var(--accent, #5b63d6);
+  }
+
+  .cmt-badge--resolved {
+    background: #6a6358;
+  }
+
   .SelectionToolbar {
     background: #1a1512;
     border-color: rgba(255, 255, 255, 0.25);
