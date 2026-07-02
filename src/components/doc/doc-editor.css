@@ -329,6 +329,27 @@
   }
 }
 
+/* ========================================
+   DocPage_layout — flex row holding the paper + comments rail.
+   On wide screens the panel sits to the right; on narrow it
+   drops below (flex-wrap: wrap kicks in below ~1100px).
+======================================== */
+
+.DocPage_layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1101px) {
+  .DocPage_layout {
+    flex-wrap: nowrap;
+  }
+}
+
 /* DocPage menu button — top-right overlay */
 .DocPage_menuBtn {
   position: fixed;

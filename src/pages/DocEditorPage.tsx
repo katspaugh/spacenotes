@@ -2,9 +2,12 @@ import { useCallback, useState } from 'react'
 import { useSession } from '@supabase/auth-helpers-react'
 import { getUrlId } from '../lib/url.js'
 import { DocEditor } from '../components/doc/DocEditor.js'
+import { CommentsPanel } from '../components/doc/CommentsPanel.js'
 import { LoginModal } from '../components/LoginModal.js'
 import { Sidebar } from '../components/Sidebar.js'
 import { useTextDocState } from '../hooks/useTextDocState.js'
+import { useComments } from '../hooks/useComments.js'
+import type { CommentAnchor } from '../types/comment.js'
 import '../components/doc/doc-editor.css'
 
 function formatEditedDate(date: Date): string {
@@ -15,8 +18,13 @@ export function DocEditorPage() {
   const id = getUrlId()
   const state = useTextDocState(id)
   const session = useSession()
+  const comments = useComments(id, state.doc?.userId)
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [activeThreadId, setActiveThreadId] = useState<string | undefined>(undefined)
+
+  const isSignedIn = !!session?.user?.id
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen((open) => !open)
@@ -38,6 +46,20 @@ export function DocEditorPage() {
     setIsLoginModalOpen(false)
     state.onPostLoginSave()
   }, [state])
+
+  const { addComment } = comments
+  const handleCreateComment = useCallback(
+    (anchor: CommentAnchor) => {
+      if (!isSignedIn) {
+        setIsLoginModalOpen(true)
+        return
+      }
+      const body = window.prompt('Comment:')
+      if (!body?.trim()) return
+      void addComment(anchor, body.trim())
+    },
+    [isSignedIn, addComment],
+  )
 
   if (state.error) {
     return <div className="DocEditorPage_error">{state.error}</div>
@@ -66,42 +88,61 @@ export function DocEditorPage() {
       </button>
 
       <div className="DocPage">
-        <article className="DocPaper">
-          <header className="DocHeader">
-            <p className="DocHeader_breadcrumb">
-              spaces / <strong>{docTitle}</strong>
-            </p>
+        <div className="DocPage_layout">
+          <article className="DocPaper">
+            <header className="DocHeader">
+              <p className="DocHeader_breadcrumb">
+                spaces / <strong>{docTitle}</strong>
+              </p>
 
-            <div className="DocHeader_titleWrapper">
-              <input
-                className="DocHeader_titleInput"
-                aria-label="Document title"
-                disabled={state.isLocked}
-                placeholder="Untitled document"
-                value={doc.title ?? ''}
-                onChange={(e) => state.onTitleChange(e.target.value)}
-              />
-            </div>
+              <div className="DocHeader_titleWrapper">
+                <input
+                  className="DocHeader_titleInput"
+                  aria-label="Document title"
+                  disabled={state.isLocked}
+                  placeholder="Untitled document"
+                  value={doc.title ?? ''}
+                  onChange={(e) => state.onTitleChange(e.target.value)}
+                />
+              </div>
 
-            <div className="DocHeader_byline">
-              <span className="DocHeader_avatar" aria-hidden="true">
-                {initials}
-              </span>
-              <span className="DocHeader_author">{authorName}</span>
-              <span className="DocHeader_date">· edited {editedDate}</span>
-            </div>
+              <div className="DocHeader_byline">
+                <span className="DocHeader_avatar" aria-hidden="true">
+                  {initials}
+                </span>
+                <span className="DocHeader_author">{authorName}</span>
+                <span className="DocHeader_date">· edited {editedDate}</span>
+              </div>
 
-            <hr className="DocHeader_hr" />
-          </header>
+              <hr className="DocHeader_hr" />
+            </header>
 
-          <DocEditor
-            doc={doc}
-            editable={!state.isLocked}
-            onTitleChange={state.onTitleChange}
-            onContentChange={state.onContentChange}
-            renderTitle={false}
+            <DocEditor
+              doc={doc}
+              editable={!state.isLocked}
+              onTitleChange={state.onTitleChange}
+              onContentChange={state.onContentChange}
+              renderTitle={false}
+              threads={comments.threads}
+              canComment={isSignedIn}
+              onCreateComment={handleCreateComment}
+              onFocusThread={setActiveThreadId}
+            />
+          </article>
+
+          <CommentsPanel
+            openThreads={comments.openThreads}
+            resolvedThreads={comments.resolvedThreads}
+            canComment={isSignedIn}
+            onSignIn={openLoginModal}
+            activeThreadId={activeThreadId}
+            canReply={isSignedIn}
+            canResolve={comments.canResolve}
+            onReply={(tid, body) => { void comments.reply(tid, body) }}
+            onResolve={(tid, resolved) => { void comments.resolve(tid, resolved) }}
+            onFocusThread={setActiveThreadId}
           />
-        </article>
+        </div>
       </div>
 
       <Sidebar

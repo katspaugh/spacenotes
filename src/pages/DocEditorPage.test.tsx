@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSession } from '@supabase/auth-helpers-react'
 import { createTextDoc } from '../lib/doc-kind.js'
 import { loadDoc, saveDoc, saveDocBeacon } from '../lib/dinky-api.js'
+import { useComments } from '../hooks/useComments.js'
+import type { CommentThread } from '../types/comment.js'
 import { DocEditorPage } from './DocEditorPage.js'
 
 vi.mock('@supabase/auth-helpers-react', () => ({
@@ -25,7 +27,8 @@ vi.mock('../components/Sidebar.js', () => ({
 }))
 
 vi.mock('../components/LoginModal.js', () => ({
-  LoginModal: () => null,
+  LoginModal: ({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? <div>Login Modal</div> : null,
 }))
 
 // Stub DocEditor to avoid TipTap JSDOM complexity in page-level tests
@@ -35,15 +38,76 @@ vi.mock('../components/doc/DocEditor.js', () => ({
   ),
 }))
 
+vi.mock('../hooks/useComments.js', () => ({
+  useComments: vi.fn(),
+}))
+
+// ---------------------------------------------------------------------------
+// Shared fixtures
+// ---------------------------------------------------------------------------
+
+const mockThread: CommentThread = {
+  root: {
+    id: 'comment-1',
+    docId: 'doc-1',
+    threadId: 'thread-1',
+    parentId: null,
+    authorId: 'user-1',
+    authorName: 'ivan',
+    body: 'First comment',
+    anchor: { from: 1, to: 5, quote: 'hell' },
+    resolved: false,
+    createdAt: new Date().toISOString(),
+  },
+  replies: [],
+  resolved: false,
+  outdated: false,
+}
+
+const mockReply = vi.fn().mockResolvedValue(undefined)
+const mockResolve = vi.fn().mockResolvedValue(undefined)
+const mockAddComment = vi.fn().mockResolvedValue(undefined)
+const mockCanResolve = vi.fn().mockReturnValue(true)
+
+function mockCommentsReturn(overrides: Partial<ReturnType<typeof useComments>> = {}) {
+  vi.mocked(useComments).mockReturnValue({
+    threads: [mockThread],
+    openThreads: [mockThread],
+    resolvedThreads: [],
+    loading: false,
+    error: null,
+    addComment: mockAddComment,
+    reply: mockReply,
+    resolve: mockResolve,
+    remove: vi.fn().mockResolvedValue(undefined),
+    canResolve: mockCanResolve,
+    ...overrides,
+  })
+}
+
+function mockSignedInSession() {
+  vi.mocked(useSession).mockReturnValue({
+    access_token: 'token-1',
+    user: { id: 'user-1', email: 'ivan@example.com' },
+  } as ReturnType<typeof useSession>)
+}
+
+function mockAnonymousSession() {
+  vi.mocked(useSession).mockReturnValue(null)
+}
+
+// ---------------------------------------------------------------------------
+// Header tests (original suite)
+// ---------------------------------------------------------------------------
+
 describe('DocEditorPage header', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     vi.setSystemTime(new Date('2026-06-30T12:00:00Z'))
 
-    vi.mocked(useSession).mockReturnValue({
-      access_token: 'token-1',
-      user: { id: 'user-1', email: 'ivan@example.com' },
-    } as ReturnType<typeof useSession>)
+    mockSignedInSession()
+    // Use empty threads so no comment-author text conflicts with header-author text
+    mockCommentsReturn({ threads: [], openThreads: [], resolvedThreads: [] })
 
     vi.mocked(loadDoc).mockResolvedValue({
       ...createTextDoc('doc-1', 'user-1'),
@@ -114,5 +178,117 @@ describe('DocEditorPage header', () => {
 
     const error = await screen.findByText(/could not be opened/)
     expect(error).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Comments integration tests
+// ---------------------------------------------------------------------------
+
+describe('DocEditorPage comments', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+
+    vi.mocked(loadDoc).mockResolvedValue({
+      ...createTextDoc('doc-1', 'user-1'),
+      title: 'Test Doc',
+    })
+    vi.mocked(saveDoc).mockResolvedValue({ status: 200, key: 'doc-1' })
+    vi.mocked(saveDocBeacon).mockReturnValue(undefined)
+    mockReply.mockClear()
+    mockResolve.mockClear()
+    mockAddComment.mockClear()
+    mockCanResolve.mockClear()
+    mockCanResolve.mockReturnValue(true)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('renders CommentsPanel with open threads from the hook', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    // The thread body text should appear in the CommentsPanel
+    expect(screen.getByTestId('comment-body')).toHaveTextContent('First comment')
+  })
+
+  it('shows "Sign in to comment" button for anonymous viewers', async () => {
+    mockAnonymousSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    expect(screen.getByRole('button', { name: /sign in to comment/i })).toBeInTheDocument()
+  })
+
+  it('clicking "Sign in to comment" opens the LoginModal', async () => {
+    mockAnonymousSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    fireEvent.click(screen.getByRole('button', { name: /sign in to comment/i }))
+
+    expect(screen.getByText('Login Modal')).toBeInTheDocument()
+  })
+
+  it('reply from CommentsPanel calls hook reply with the correct threadId and body', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    const replyInput = screen.getByLabelText('Write a reply')
+    fireEvent.change(replyInput, { target: { value: 'A reply text' } })
+    fireEvent.keyDown(replyInput, { key: 'Enter' })
+
+    expect(mockReply).toHaveBeenCalledWith('thread-1', 'A reply text')
+  })
+
+  it('resolve button from CommentsPanel calls hook resolve with the correct threadId', async () => {
+    mockSignedInSession()
+    mockCommentsReturn()
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    const resolveBtn = screen.getByRole('button', { name: 'Resolve' })
+    fireEvent.click(resolveBtn)
+
+    expect(mockResolve).toHaveBeenCalledWith('thread-1', true)
+  })
+
+  it('renders the resolved tab when there are resolved threads', async () => {
+    const resolvedThread: CommentThread = {
+      ...mockThread,
+      root: { ...mockThread.root, threadId: 'thread-2', resolved: true },
+      resolved: true,
+    }
+    mockSignedInSession()
+    mockCommentsReturn({
+      openThreads: [],
+      resolvedThreads: [resolvedThread],
+      threads: [resolvedThread],
+    })
+
+    render(<DocEditorPage />)
+
+    await screen.findByRole('textbox', { name: 'Document title' })
+
+    // The resolved tab counter should show 1
+    expect(screen.getByRole('button', { name: /resolved · 1/i })).toBeInTheDocument()
   })
 })
